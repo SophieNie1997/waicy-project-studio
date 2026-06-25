@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 import App from "./App";
@@ -49,6 +49,32 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Go to Product Canvas" }));
 
     expect(screen.getByRole("heading", { name: "Make the idea buildable." })).toBeInTheDocument();
+  });
+
+  it("carries borrowed design rules into the Product Canvas", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const borrowButtons = screen.getAllByRole("button", { name: "Borrow this rule" });
+    for (const button of borrowButtons) {
+      await user.click(button);
+    }
+    await user.click(screen.getByRole("button", { name: "Go to Product Canvas" }));
+
+    expect(screen.getByRole("heading", { name: "Borrowed design rules" })).toBeInTheDocument();
+    expect(screen.getByText("Use these as decision checks while filling the canvas.")).toBeInTheDocument();
+    const canvasRules = screen.getByRole("list", { name: "Canvas borrowed design rules" });
+    expect(within(canvasRules).getByText("One product, one main message, one clear action.")).toBeInTheDocument();
+    expect(
+      within(canvasRules).getByText("Use one strong visual and a few powerful words to make people feel something."),
+    ).toBeInTheDocument();
+    expect(
+      within(canvasRules).getByText("Make the user feel the product understands their taste, identity, or mood."),
+    ).toBeInTheDocument();
+    expect(
+      within(canvasRules).getByText("Give fast feedback through color, sound, progress, and rewards."),
+    ).toBeInTheDocument();
+    expect(within(canvasRules).getAllByText("Where this should show up:")).toHaveLength(4);
   });
 
   it("shows website previews that open the original design references", () => {
