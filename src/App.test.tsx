@@ -62,19 +62,18 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Go to Product Canvas" }));
 
     expect(screen.getByRole("heading", { name: "Borrowed design rules" })).toBeInTheDocument();
-    expect(screen.getByText("Use these as decision checks while filling the canvas.")).toBeInTheDocument();
+    expect(screen.getByText("Keep these visible while you make canvas decisions.")).toBeInTheDocument();
     const canvasRules = screen.getByRole("list", { name: "Canvas borrowed design rules" });
-    expect(within(canvasRules).getByText("One product, one main message, one clear action.")).toBeInTheDocument();
-    expect(
-      within(canvasRules).getByText("Use one strong visual and a few powerful words to make people feel something."),
-    ).toBeInTheDocument();
-    expect(
-      within(canvasRules).getByText("Make the user feel the product understands their taste, identity, or mood."),
-    ).toBeInTheDocument();
-    expect(
-      within(canvasRules).getByText("Give fast feedback through color, sound, progress, and rewards."),
-    ).toBeInTheDocument();
-    expect(within(canvasRules).getAllByText("Where this should show up:")).toHaveLength(4);
+    expect(canvasRules).toHaveClass("canvas-rule-strip-list");
+    expect(within(canvasRules).getByText("Focus")).toBeInTheDocument();
+    expect(within(canvasRules).getByText("Emotion")).toBeInTheDocument();
+    expect(within(canvasRules).getByText("Belonging")).toBeInTheDocument();
+    expect(within(canvasRules).getByText("Feedback")).toBeInTheDocument();
+    expect(within(canvasRules).getByText("Check: title, seed idea, output.")).toBeInTheDocument();
+    expect(within(canvasRules).getByText("Check: output and screen feedback.")).toBeInTheDocument();
+
+    const specificityCheck = screen.getByRole("complementary", { name: "Specificity check" });
+    expect(within(specificityCheck).queryByText("Focus")).not.toBeInTheDocument();
   });
 
   it("shows website previews that open the original design references", () => {

@@ -8,27 +8,55 @@ interface ProductCanvasProps {
   onChange: (project: StudioProject) => void;
 }
 
-const canvasCuesByPrinciple = new Map([
+interface CanvasDesignRule {
+  label: string;
+  shortRule: string;
+  cue: string;
+}
+
+const canvasRulesByPrinciple = new Map<string, CanvasDesignRule>([
   [
     "One product, one main message, one clear action.",
-    "Project title, seed idea, and output should point to one clear promise.",
+    {
+      label: "Focus",
+      shortRule: "One clear promise",
+      cue: "Check: title, seed idea, output.",
+    },
   ],
   [
     "Use one strong visual and a few powerful words to make people feel something.",
-    "Problem and user moment should describe a feeling the prototype can show on screen.",
+    {
+      label: "Emotion",
+      shortRule: "One feeling",
+      cue: "Check: problem, user moment.",
+    },
   ],
   [
     "Make the user feel the product understands their taste, identity, or mood.",
-    "Specific user should be narrow enough that the product can feel personal.",
+    {
+      label: "Belonging",
+      shortRule: "One specific user",
+      cue: "Check: specific user.",
+    },
   ],
   [
     "Give fast feedback through color, sound, progress, and rewards.",
-    "Output should name what the user sees after each action, not just what the AI thinks.",
+    {
+      label: "Feedback",
+      shortRule: "One fast response",
+      cue: "Check: output and screen feedback.",
+    },
   ],
 ]);
 
-function getCanvasCue(principle: string): string {
-  return canvasCuesByPrinciple.get(principle) ?? "Choose one canvas answer this rule should change.";
+function getCanvasRule(principle: string): CanvasDesignRule {
+  return (
+    canvasRulesByPrinciple.get(principle) ?? {
+      label: "Rule",
+      shortRule: principle,
+      cue: "Check: choose one canvas answer this should change.",
+    }
+  );
 }
 
 export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
@@ -44,6 +72,26 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
       <p className="eyebrow">Product Canvas</p>
       <h1>Make the idea buildable.</h1>
       <p className="lede">Codex stays locked until the project is specific enough to explain in 20 seconds.</p>
+      {hasBorrowedPrinciples ? (
+        <section className="canvas-rule-strip" aria-labelledby="canvas-design-rules-heading">
+          <div>
+            <h2 id="canvas-design-rules-heading">Borrowed design rules</h2>
+            <p>Keep these visible while you make canvas decisions.</p>
+          </div>
+          <ul className="canvas-rule-strip-list" aria-label="Canvas borrowed design rules">
+            {project.borrowedPrinciples.map((principle) => {
+              const rule = getCanvasRule(principle);
+              return (
+                <li className="canvas-rule-chip" key={principle}>
+                  <span className="canvas-rule-label">{rule.label}</span>
+                  <strong>{rule.shortRule}</strong>
+                  <span>{rule.cue}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
       <div className="canvas-layout">
         <div className="form-grid">
           <Field label="Project title" value={project.title} onChange={(value) => updateField("title", value)} placeholder="Lunch Lens" />
@@ -106,26 +154,9 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
             multiline
           />
         </div>
-        <aside className="canvas-card">
-          {hasBorrowedPrinciples ? (
-            <section className="canvas-rule-section" aria-labelledby="canvas-design-rules-heading">
-              <h2 id="canvas-design-rules-heading">Borrowed design rules</h2>
-              <p>Use these as decision checks while filling the canvas.</p>
-              <ul className="canvas-rule-list" aria-label="Canvas borrowed design rules">
-                {project.borrowedPrinciples.map((principle) => (
-                  <li className="canvas-rule-item" key={principle}>
-                    <strong>{principle}</strong>
-                    <span className="canvas-rule-cue">
-                      <span className="canvas-rule-cue-label">Where this should show up:</span>
-                      {getCanvasCue(principle)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
+        <aside className="canvas-card" aria-labelledby="specificity-check-heading">
           <section className="canvas-support-section">
-            <h2>Specificity check</h2>
+            <h2 id="specificity-check-heading">Specificity check</h2>
             <p>
               Too vague: <strong>An AI app to help the environment.</strong>
             </p>
