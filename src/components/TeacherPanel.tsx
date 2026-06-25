@@ -38,6 +38,18 @@ export function TeacherPanel({ project, onExport, onImport }: TeacherPanelProps)
           ))}
         </div>
       </section>
+      <section className="panel-card">
+        <h2>Borrowed rules</h2>
+        {project.borrowedPrinciples.length > 0 ? (
+          <ul className="panel-list">
+            {project.borrowedPrinciples.map((principle) => (
+              <li key={principle}>{principle}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>No design rules borrowed yet.</p>
+        )}
+      </section>
       <button className="secondary-button" onClick={onExport} type="button">
         Export JSON
       </button>

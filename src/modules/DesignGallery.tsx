@@ -41,6 +41,10 @@ const references = [
 ];
 
 export function DesignGallery({ project, onChange }: DesignGalleryProps) {
+  const borrowedCount = project.borrowedPrinciples.length;
+  const borrowedStatus =
+    borrowedCount === 1 ? "1 design rule borrowed" : `${borrowedCount} design rules borrowed`;
+
   function togglePrinciple(principle: string) {
     const exists = project.borrowedPrinciples.includes(principle);
     onChange({
@@ -56,31 +60,54 @@ export function DesignGallery({ project, onChange }: DesignGalleryProps) {
       <p className="eyebrow">Design Gallery</p>
       <h1>Look, notice, borrow.</h1>
       <p className="lede">Study strong websites to extract design principles for your own product.</p>
+      <div className={`borrowed-feedback ${borrowedCount > 0 ? "has-borrowed" : ""}`} role="status" aria-live="polite">
+        <p className="borrowed-count">{borrowedCount > 0 ? borrowedStatus : "No design rules borrowed yet"}</p>
+        <p>
+          {borrowedCount > 0
+            ? "These rules will travel into the Product Canvas, teacher review, and Codex handoff."
+            : "Choose one or two rules that should shape the students' own prototype."}
+        </p>
+        {borrowedCount > 0 ? (
+          <ul className="borrowed-list" aria-label="Borrowed design rules">
+            {project.borrowedPrinciples.map((principle) => (
+              <li key={principle}>{principle}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
       <div className="reference-grid">
-        {references.map((reference) => (
-          <article className="reference-card" key={reference.name}>
-            <a
-              className="reference-preview"
-              href={reference.url}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`Open ${reference.name} website`}
-            >
-              <img src={reference.image} alt={`${reference.name} website preview`} loading="lazy" />
-              <span className="reference-open-label">Open site</span>
-            </a>
-            <h2>
-              <a className="reference-title-link" href={reference.url} target="_blank" rel="noreferrer">
-                {reference.name}: {reference.lesson}
+        {references.map((reference) => {
+          const isBorrowed = project.borrowedPrinciples.includes(reference.principle);
+          return (
+            <article className={`reference-card ${isBorrowed ? "borrowed-card" : ""}`} key={reference.name}>
+              <a
+                className="reference-preview"
+                href={reference.url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Open ${reference.name} website`}
+              >
+                <img src={reference.image} alt={`${reference.name} website preview`} loading="lazy" />
+                <span className="reference-open-label">Open site</span>
               </a>
-            </h2>
-            <p>{reference.principle}</p>
-            <strong>{reference.question}</strong>
-            <button className="secondary-button" type="button" onClick={() => togglePrinciple(reference.principle)}>
-              {project.borrowedPrinciples.includes(reference.principle) ? "Borrowed" : "Borrow this rule"}
-            </button>
-          </article>
-        ))}
+              <h2>
+                <a className="reference-title-link" href={reference.url} target="_blank" rel="noreferrer">
+                  {reference.name}: {reference.lesson}
+                </a>
+              </h2>
+              <p>{reference.principle}</p>
+              <strong>{reference.question}</strong>
+              <button
+                aria-pressed={isBorrowed}
+                className={`secondary-button ${isBorrowed ? "borrowed-action" : ""}`}
+                type="button"
+                onClick={() => togglePrinciple(reference.principle)}
+              >
+                {isBorrowed ? "Borrowed" : "Borrow this rule"}
+              </button>
+            </article>
+          );
+        })}
       </div>
     </section>
   );

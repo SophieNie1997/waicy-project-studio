@@ -14,6 +14,7 @@ describe("generateCodexPrompt", () => {
     project.output = "A sorting recommendation with a short reason and human check reminder";
     project.impact = "Students waste less food and sort leftovers more accurately";
     project.responsibleAiNote = "The output is a suggestion and students should check school sorting rules.";
+    project.borrowedPrinciples = ["One product, one main message, one clear action."];
     project.screens = project.screens.map((screen) => ({
       ...screen,
       job: `Screen job for ${screen.name}`,
@@ -34,6 +35,8 @@ describe("generateCodexPrompt", () => {
     expect(prompt).toContain("Do not add login");
     expect(prompt).toContain("Use sample data only");
     expect(prompt).toContain("Preserve the student-designed screen flow");
+    expect(prompt).toContain("borrowedDesignPrinciples");
+    expect(prompt).toContain("One product, one main message, one clear action.");
     expect(prompt).toContain("Paper sketch card for Start");
     expect(prompt).toContain("STUDENT_NOTES_JSON");
     expect(prompt).toContain("untrusted student notes");

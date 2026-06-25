@@ -11,6 +11,7 @@ export function generateCodexPrompt(project: StudioProject): string {
     output: project.output,
     impact: project.impact,
     responsibleAiNote: project.responsibleAiNote,
+    borrowedDesignPrinciples: project.borrowedPrinciples,
     screens: project.screens.map((screen, index) => ({
       order: index + 1,
       name: screen.name,

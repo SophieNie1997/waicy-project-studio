@@ -35,6 +35,8 @@ describe("App", () => {
     await user.click(screen.getAllByRole("button", { name: "Borrow this rule" })[0]);
 
     expect(screen.getByRole("button", { name: "Borrowed" })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("1 design rule borrowed");
+    expect(screen.getAllByText("One product, one main message, one clear action.")).toHaveLength(3);
   });
 
   it("shows website previews that open the original design references", () => {
