@@ -421,6 +421,29 @@ h1 {
   line-height: 1.45;
 }
 
+.next-step-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  padding-top: 12px;
+}
+
+.next-step-panel p {
+  color: var(--ink);
+}
+
+.next-step-panel strong {
+  font-weight: 900;
+}
+
+.compact-action {
+  justify-self: start;
+  width: auto;
+  min-width: 190px;
+  padding-inline: 18px;
+}
+
 .secondary-button.borrowed-action,
 .secondary-button.borrowed-action:hover,
 .secondary-button.borrowed-action:focus-visible {
@@ -602,6 +625,10 @@ h1 {
   .module-panel {
     min-height: 60dvh;
     padding: 20px;
+  }
+
+  .compact-action {
+    width: 100%;
   }
 
   h1 {

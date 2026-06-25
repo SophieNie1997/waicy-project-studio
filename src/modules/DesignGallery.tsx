@@ -3,6 +3,7 @@ import type { StudioProject } from "../domain/types";
 interface DesignGalleryProps {
   project: StudioProject;
   onChange: (project: StudioProject) => void;
+  onContinue: () => void;
 }
 
 const references = [
@@ -40,10 +41,14 @@ const references = [
   },
 ];
 
-export function DesignGallery({ project, onChange }: DesignGalleryProps) {
+export function DesignGallery({ project, onChange, onContinue }: DesignGalleryProps) {
   const borrowedCount = project.borrowedPrinciples.length;
   const borrowedStatus =
     borrowedCount === 1 ? "1 design rule borrowed" : `${borrowedCount} design rules borrowed`;
+  const nextStepGuidance =
+    borrowedCount > 2
+      ? "You borrowed several. Circle the strongest 1-2 rules, then use them as the design spine for your product."
+      : "Use the borrowed rule to shape the first version of your product idea.";
 
   function togglePrinciple(principle: string) {
     const exists = project.borrowedPrinciples.includes(principle);
@@ -68,11 +73,21 @@ export function DesignGallery({ project, onChange }: DesignGalleryProps) {
             : "Choose one or two rules that should shape the students' own prototype."}
         </p>
         {borrowedCount > 0 ? (
-          <ul className="borrowed-list" aria-label="Borrowed design rules">
-            {project.borrowedPrinciples.map((principle) => (
-              <li key={principle}>{principle}</li>
-            ))}
-          </ul>
+          <>
+            <ul className="borrowed-list" aria-label="Borrowed design rules">
+              {project.borrowedPrinciples.map((principle) => (
+                <li key={principle}>{principle}</li>
+              ))}
+            </ul>
+            <div className="next-step-panel">
+              <p>
+                <strong>Next step:</strong> {nextStepGuidance}
+              </p>
+              <button className="secondary-button compact-action" type="button" onClick={onContinue}>
+                Go to Product Canvas
+              </button>
+            </div>
+          </>
         ) : null}
       </div>
       <div className="reference-grid">

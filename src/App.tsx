@@ -43,7 +43,11 @@ export default function App() {
 
   const moduleView =
     activeModule === "design-gallery" ? (
-      <DesignGallery project={project} onChange={setProject} />
+      <DesignGallery
+        project={project}
+        onChange={setProject}
+        onContinue={() => setActiveModule("product-canvas")}
+      />
     ) : activeModule === "product-canvas" ? (
       <ProductCanvas project={project} onChange={setProject} />
     ) : activeModule === "ui-sketch-lab" ? (

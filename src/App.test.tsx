@@ -36,7 +36,19 @@ describe("App", () => {
 
     expect(screen.getByRole("button", { name: "Borrowed" })).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("1 design rule borrowed");
+    expect(screen.getByRole("status")).toHaveTextContent("Next step");
+    expect(screen.getByRole("button", { name: "Go to Product Canvas" })).toBeInTheDocument();
     expect(screen.getAllByText("One product, one main message, one clear action.")).toHaveLength(3);
+  });
+
+  it("continues from borrowed rules into the Product Canvas", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getAllByRole("button", { name: "Borrow this rule" })[0]);
+    await user.click(screen.getByRole("button", { name: "Go to Product Canvas" }));
+
+    expect(screen.getByRole("heading", { name: "Make the idea buildable." })).toBeInTheDocument();
   });
 
   it("shows website previews that open the original design references", () => {
