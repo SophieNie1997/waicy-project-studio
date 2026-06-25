@@ -42,8 +42,8 @@ describe("App", () => {
 
     const expectedReferences = [
       ["Apple", "https://www.apple.com/"],
-      ["Code.org", "https://code.org/en-US/students/middle-and-high-school"],
-      ["Scratch", "https://scratch.mit.edu/projects/editor/?tutorial=all"],
+      ["Nike", "https://www.nike.com/"],
+      ["Spotify", "https://www.spotify.com/us/premium/"],
       ["Duolingo App", "https://usabilitygeek.com/ux-case-study-duolingo/"],
     ];
 
