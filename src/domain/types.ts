@@ -14,31 +14,51 @@ export interface StudioScreen {
   job: string;
   userAction: string;
   mainButtonLabel: string;
+  inputNeeded: string;
+  outputShown: string;
   feedbackState: string;
   trustSignal: string;
+  paperSketchReference: string;
 }
 
 export interface BuildLog {
-  moduleId: ModuleId;
-  message: string;
-  at: string;
+  version: string;
+  prompt: string;
+  prototypeLink: string;
+  screenshotsNeeded: string[];
+  teacherNotes: string;
+  openQuestions: string[];
 }
 
 export interface TestNote {
-  message: string;
-  passed: boolean;
-  at: string;
+  id: string;
+  tester: string;
+  task: string;
+  pausePoint: string;
+  confusion: string;
+  whatWorked: string;
+  chosenImprovement: string;
 }
 
 export interface EvidencePack {
-  id: string;
-  title: string;
-  notes: string[];
-  createdAt: string;
+  whatNotes: string;
+  whyNotes: string;
+  howNotes: string;
+  impactNotes: string;
+  prototypeFlow: string;
+  screenshotList: string[];
+  beforeAfterComparison: string;
+  testingNotes: string;
+  responsibleAiStatement: string;
+  futurePotential: string;
+  pdfOutline: string;
+  videoScriptOutline: string;
 }
 
 export interface StudioProject {
+  title: string;
   seedIdea: string;
+  oneSentenceFormula: string;
   problem: string;
   user: string;
   userMoment: string;
@@ -47,12 +67,15 @@ export interface StudioProject {
   output: string;
   impact: string;
   responsibleAiNote: string;
+  borrowedPrinciples: string[];
   screens: StudioScreen[];
-  buildLog: BuildLog[];
+  buildLogs: BuildLog[];
   testNotes: TestNote[];
-  evidencePacks: EvidencePack[];
+  evidencePack: EvidencePack;
 }
 
 export interface ReadinessItem {
+  label: string;
   ready: boolean;
+  guidance: string;
 }

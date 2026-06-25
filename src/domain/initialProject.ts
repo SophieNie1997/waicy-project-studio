@@ -6,13 +6,18 @@ const createScreen = (id: ScreenId, name: string): StudioScreen => ({
   job: "",
   userAction: "",
   mainButtonLabel: "",
+  inputNeeded: "",
+  outputShown: "",
   feedbackState: "",
   trustSignal: "",
+  paperSketchReference: "",
 });
 
 export const createInitialProject = (): StudioProject => {
   return {
+    title: "",
     seedIdea: "",
+    oneSentenceFormula: "",
     problem: "",
     user: "",
     userMoment: "",
@@ -21,6 +26,7 @@ export const createInitialProject = (): StudioProject => {
     output: "",
     impact: "",
     responsibleAiNote: "",
+    borrowedPrinciples: [],
     screens: [
       createScreen("start", "Start"),
       createScreen("input", "Input"),
@@ -28,8 +34,21 @@ export const createInitialProject = (): StudioProject => {
       createScreen("human-review", "Human Review"),
       createScreen("impact", "Impact"),
     ],
-    buildLog: [],
+    buildLogs: [],
     testNotes: [],
-    evidencePacks: [],
+    evidencePack: {
+      whatNotes: "",
+      whyNotes: "",
+      howNotes: "",
+      impactNotes: "",
+      prototypeFlow: "",
+      screenshotList: [],
+      beforeAfterComparison: "",
+      testingNotes: "",
+      responsibleAiStatement: "",
+      futurePotential: "",
+      pdfOutline: "",
+      videoScriptOutline: "",
+    },
   };
 };
