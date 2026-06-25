@@ -5,18 +5,10 @@ import { exportProjectJson } from "./domain/storage";
 import type { ModuleId, StudioProject } from "./domain/types";
 import { CodexBuildDesk } from "./modules/CodexBuildDesk";
 import { DesignGallery } from "./modules/DesignGallery";
+import { EvidencePack } from "./modules/EvidencePack";
 import { ProductCanvas } from "./modules/ProductCanvas";
+import { TestIterate } from "./modules/TestIterate";
 import { UISketchLab } from "./modules/UISketchLab";
-
-function PlaceholderModule({ title }: { title: string }) {
-  return (
-    <section className="module-panel">
-      <p className="eyebrow">WAICY Project Studio</p>
-      <h1>{title}</h1>
-      <p className="lede">This module will guide students through a focused project-design activity.</p>
-    </section>
-  );
-}
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<ModuleId>("design-gallery");
@@ -35,13 +27,10 @@ export default function App() {
       <UISketchLab project={project} onChange={setProject} />
     ) : activeModule === "codex-build-desk" ? (
       <CodexBuildDesk project={project} />
+    ) : activeModule === "test-iterate" ? (
+      <TestIterate project={project} onChange={setProject} />
     ) : (
-      <PlaceholderModule
-        title={{
-          "test-iterate": "Test & Iterate",
-          "evidence-pack": "Evidence Pack",
-        }[activeModule]}
-      />
+      <EvidencePack project={project} />
     );
 
   return (

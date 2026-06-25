@@ -41,4 +41,13 @@ describe("App", () => {
 
     expect(screen.getByText("Codex is locked")).toBeInTheDocument();
   });
+
+  it("opens the Evidence Pack module", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Evidence Pack Lesson 6" }));
+
+    expect(screen.getByRole("heading", { name: "Turn process into story." })).toBeInTheDocument();
+  });
 });
