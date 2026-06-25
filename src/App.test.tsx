@@ -42,9 +42,9 @@ describe("App", () => {
 
     const expectedReferences = [
       ["Apple", "https://www.apple.com/"],
-      ["Stripe", "https://stripe.com/"],
-      ["Linear", "https://linear.app/"],
-      ["Duolingo", "https://www.duolingo.com/"],
+      ["Code.org", "https://code.org/en-US/students/middle-and-high-school"],
+      ["Scratch", "https://scratch.mit.edu/projects/editor/?tutorial=all"],
+      ["Duolingo App", "https://usabilitygeek.com/ux-case-study-duolingo/"],
     ];
 
     expectedReferences.forEach(([name, url]) => {
