@@ -1,3 +1,4 @@
+import { MissionBanner } from "../components/MissionBanner";
 import type { StudioProject } from "../domain/types";
 
 interface DesignGalleryProps {
@@ -44,11 +45,11 @@ const references = [
 export function DesignGallery({ project, onChange, onContinue }: DesignGalleryProps) {
   const borrowedCount = project.borrowedPrinciples.length;
   const borrowedStatus =
-    borrowedCount === 1 ? "1 design rule borrowed" : `${borrowedCount} design rules borrowed`;
+    borrowedCount === 1 ? "1 move in your toolkit" : `${borrowedCount} moves in your toolkit`;
   const nextStepGuidance =
     borrowedCount > 2
-      ? "You borrowed several. Circle the strongest 1-2 rules, then use them as the design spine for your product."
-      : "Use the borrowed rule to shape the first version of your product idea.";
+      ? "You collected several. Circle the strongest 1-2 moves, then use them as the design spine for your product."
+      : "Use this move to shape the first version of your product idea.";
 
   function togglePrinciple(principle: string) {
     const exists = project.borrowedPrinciples.includes(principle);
@@ -62,15 +63,20 @@ export function DesignGallery({ project, onChange, onContinue }: DesignGalleryPr
 
   return (
     <section className="module-panel">
-      <p className="eyebrow">Design Gallery</p>
+      <p className="eyebrow">Find Design Moves</p>
       <h1>Look, notice, borrow.</h1>
       <p className="lede">Study strong websites to extract design principles for your own product.</p>
+      <MissionBanner
+        title="Collect one design move your own app should use."
+        detail="Look at real products. Borrow the rule behind the design, not the brand style."
+        progress={borrowedCount > 0 ? borrowedStatus : "Start here"}
+      />
       <div className={`borrowed-feedback ${borrowedCount > 0 ? "has-borrowed" : ""}`} role="status" aria-live="polite">
-        <p className="borrowed-count">{borrowedCount > 0 ? borrowedStatus : "No design rules borrowed yet"}</p>
+        <p className="borrowed-count">{borrowedCount > 0 ? `Design move collected: ${borrowedStatus}` : "No design moves collected yet"}</p>
         <p>
           {borrowedCount > 0
-            ? "These rules will travel into the Product Canvas, teacher review, and Codex handoff."
-            : "Choose one or two rules that should shape the students' own prototype."}
+            ? "These moves will travel into your product canvas, teacher review, and Codex handoff."
+            : "Choose one or two moves that should shape your own prototype."}
         </p>
         {borrowedCount > 0 ? (
           <>
@@ -84,7 +90,7 @@ export function DesignGallery({ project, onChange, onContinue }: DesignGalleryPr
                 <strong>Next step:</strong> {nextStepGuidance}
               </p>
               <button className="secondary-button compact-action" type="button" onClick={onContinue}>
-                Go to Product Canvas
+                Make Idea Real
               </button>
             </div>
           </>

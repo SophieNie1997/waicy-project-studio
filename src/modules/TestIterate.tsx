@@ -1,4 +1,5 @@
 import { Field } from "../components/Field";
+import { MissionBanner } from "../components/MissionBanner";
 import type { StudioProject, TestNote } from "../domain/types";
 
 interface TestIterateProps {
@@ -25,9 +26,14 @@ export function TestIterate({ project, onChange }: TestIterateProps) {
 
   return (
     <section className="module-panel">
-      <p className="eyebrow">Test & Iterate</p>
+      <p className="eyebrow">Test and Improve</p>
       <h1>Test before polishing.</h1>
       <p className="lede">Watch someone use v1, then choose one meaningful improvement for v2.</p>
+      <MissionBanner
+        title="Watch one person use v1 and choose one real improvement."
+        detail="Do not add random features. Fix the clearest problem you saw."
+        progress="V1 to V2"
+      />
       <div className="form-grid">
         <Field label="Tester" value={note.tester} onChange={(value) => updateNote({ tester: value })} placeholder="Peer tester" />
         <Field

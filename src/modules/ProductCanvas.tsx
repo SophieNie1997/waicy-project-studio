@@ -1,4 +1,5 @@
 import { Field } from "../components/Field";
+import { MissionBanner } from "../components/MissionBanner";
 import { StatusPill } from "../components/StatusPill";
 import { getProjectReadiness } from "../domain/readiness";
 import type { StudioProject } from "../domain/types";
@@ -69,16 +70,21 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
 
   return (
     <section className="module-panel">
-      <p className="eyebrow">Product Canvas</p>
+      <p className="eyebrow">Make Idea Real</p>
       <h1>Make the idea buildable.</h1>
       <p className="lede">Codex stays locked until the project is specific enough to explain in 20 seconds.</p>
+      <MissionBanner
+        title="Make one idea specific enough that another person can picture it."
+        detail="Name the user, the moment, the AI action, and what appears on screen."
+        progress="Project brief"
+      />
       {hasBorrowedPrinciples ? (
         <section className="canvas-rule-strip" aria-labelledby="canvas-design-rules-heading">
           <div>
-            <h2 id="canvas-design-rules-heading">Borrowed design rules</h2>
-            <p>Keep these visible while you make canvas decisions.</p>
+            <h2 id="canvas-design-rules-heading">Design moves you collected</h2>
+            <p>Use these moves while you make product decisions.</p>
           </div>
-          <ul className="canvas-rule-strip-list" aria-label="Canvas borrowed design rules">
+          <ul className="canvas-rule-strip-list" aria-label="Canvas collected design moves">
             {project.borrowedPrinciples.map((principle) => {
               const rule = getCanvasRule(principle);
               return (
@@ -93,7 +99,7 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
         </section>
       ) : null}
       <div className="canvas-layout">
-        <div className="form-grid">
+        <div className="form-grid product-canvas-grid">
           <Field label="Project title" value={project.title} onChange={(value) => updateField("title", value)} placeholder="Lunch Lens" />
           <Field
             label="Seed idea"

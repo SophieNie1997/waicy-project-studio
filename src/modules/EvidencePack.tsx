@@ -1,3 +1,4 @@
+import { MissionBanner } from "../components/MissionBanner";
 import { generateEvidencePack } from "../domain/evidence";
 import type { StudioProject } from "../domain/types";
 
@@ -14,9 +15,14 @@ export function EvidencePack({ project }: EvidencePackProps) {
 
   return (
     <section className="module-panel">
-      <p className="eyebrow">Evidence Pack</p>
+      <p className="eyebrow">Tell the Story</p>
       <h1>Turn process into story.</h1>
       <p className="lede">Use the same evidence for the final PDF and video.</p>
+      <MissionBanner
+        title="Turn your process into PDF and video material."
+        detail="Collect what changed, why it matters, how the AI helps, and what you improved."
+        progress="Final story"
+      />
       <div className="evidence-grid">
         <article>
           <h2>What</h2>

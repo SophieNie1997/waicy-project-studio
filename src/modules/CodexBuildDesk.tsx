@@ -1,3 +1,4 @@
+import { MissionBanner } from "../components/MissionBanner";
 import { generateCodexPrompt } from "../domain/codexPrompt";
 import { canUnlockCodex, getProjectReadiness } from "../domain/readiness";
 import type { StudioProject } from "../domain/types";
@@ -17,9 +18,14 @@ export function CodexBuildDesk({ project }: CodexBuildDeskProps) {
 
   return (
     <section className="module-panel">
-      <p className="eyebrow">Codex Build Desk</p>
+      <p className="eyebrow">Build with Codex</p>
       <h1>Teacher turns student design into v1.</h1>
       <p className="lede">The prompt is manually copied by the teacher after student decisions are complete.</p>
+      <MissionBanner
+        title="When the design is ready, the teacher turns it into a build prompt."
+        detail="Codex builds from your choices. It should not invent the product for you."
+        progress={unlocked ? "Ready to build" : "Locked for now"}
+      />
       {!unlocked ? (
         <div className="lock-panel">
           <h2>Codex is locked</h2>

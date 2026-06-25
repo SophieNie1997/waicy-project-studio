@@ -8,24 +8,28 @@ describe("App", () => {
     localStorage.clear();
   });
 
-  it("renders the six Mission Control modules", () => {
+  it("renders the six student-facing project quest modules", () => {
     render(<App />);
 
-    expect(screen.getByRole("button", { name: "Design Gallery Lesson 4" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Product Canvas Lesson 4" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "UI Sketch Lab Lesson 5" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Codex Build Desk Lesson 5" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Test & Iterate Lesson 6" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Evidence Pack Lesson 6" })).toBeInTheDocument();
+    expect(screen.getByText("Project Quest")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Find Design Moves Lesson 4" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Make Idea Real Lesson 4" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Draw App Screens Lesson 5" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Build with Codex Lesson 5" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Test and Improve Lesson 6" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tell the Story Lesson 6" })).toBeInTheDocument();
+    expect(screen.getByText("Today's mission")).toBeInTheDocument();
+    expect(screen.getByText("Collect one design move your own app should use.")).toBeInTheDocument();
   });
 
   it("switches modules through the left rail", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
+    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
 
     expect(screen.getByRole("heading", { name: "Make the idea buildable." })).toBeInTheDocument();
+    expect(screen.getByText("Make one idea specific enough that another person can picture it.")).toBeInTheDocument();
   });
 
   it("records a borrowed design principle", async () => {
@@ -35,10 +39,11 @@ describe("App", () => {
     await user.click(screen.getAllByRole("button", { name: "Borrow this rule" })[0]);
 
     expect(screen.getByRole("button", { name: "Borrowed" })).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent("1 design rule borrowed");
+    expect(screen.getByRole("status")).toHaveTextContent("Design move collected");
+    expect(screen.getByRole("status")).toHaveTextContent("1 move in your toolkit");
     expect(screen.getByRole("status")).toHaveTextContent("Next step");
-    expect(screen.getByRole("button", { name: "Go to Product Canvas" })).toBeInTheDocument();
-    expect(screen.getAllByText("One product, one main message, one clear action.")).toHaveLength(3);
+    expect(screen.getByRole("button", { name: "Make Idea Real" })).toBeInTheDocument();
+    expect(screen.getAllByText("One product, one main message, one clear action.")).toHaveLength(2);
   });
 
   it("continues from borrowed rules into the Product Canvas", async () => {
@@ -46,7 +51,7 @@ describe("App", () => {
     render(<App />);
 
     await user.click(screen.getAllByRole("button", { name: "Borrow this rule" })[0]);
-    await user.click(screen.getByRole("button", { name: "Go to Product Canvas" }));
+    await user.click(screen.getByRole("button", { name: "Make Idea Real" }));
 
     expect(screen.getByRole("heading", { name: "Make the idea buildable." })).toBeInTheDocument();
   });
@@ -59,11 +64,11 @@ describe("App", () => {
     for (const button of borrowButtons) {
       await user.click(button);
     }
-    await user.click(screen.getByRole("button", { name: "Go to Product Canvas" }));
+    await user.click(screen.getByRole("button", { name: "Make Idea Real" }));
 
-    expect(screen.getByRole("heading", { name: "Borrowed design rules" })).toBeInTheDocument();
-    expect(screen.getByText("Keep these visible while you make canvas decisions.")).toBeInTheDocument();
-    const canvasRules = screen.getByRole("list", { name: "Canvas borrowed design rules" });
+    expect(screen.getByRole("heading", { name: "Design moves you collected" })).toBeInTheDocument();
+    expect(screen.getByText("Use these moves while you make product decisions.")).toBeInTheDocument();
+    const canvasRules = screen.getByRole("list", { name: "Canvas collected design moves" });
     expect(canvasRules).toHaveClass("canvas-rule-strip-list");
     expect(within(canvasRules).getByText("Focus")).toBeInTheDocument();
     expect(within(canvasRules).getByText("Emotion")).toBeInTheDocument();
@@ -101,16 +106,49 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: "Codex Build Desk Lesson 5" }));
+    await user.click(screen.getByRole("button", { name: "Build with Codex Lesson 5" }));
 
     expect(screen.getByText("Codex is locked")).toBeInTheDocument();
+  });
+
+  it("keeps teacher tools folded until the teacher opens them", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    expect(screen.getByText("Teacher mode")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Show teacher tools" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Export JSON" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Show teacher tools" }));
+
+    expect(screen.getByRole("button", { name: "Hide teacher tools" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Export JSON" })).toBeInTheDocument();
+  });
+
+  it("guides UI sketching one screen at a time", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Draw App Screens Lesson 5" }));
+
+    expect(screen.getAllByText("Screen 1 of 5")).toHaveLength(2);
+    expect(screen.getByRole("heading", { name: "Start" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Start paper sketch ref")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Input paper sketch ref")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Next screen" }));
+
+    expect(screen.getAllByText("Screen 2 of 5")).toHaveLength(2);
+    expect(screen.getByRole("heading", { name: "Input" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Input paper sketch ref")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Start paper sketch ref")).not.toBeInTheDocument();
   });
 
   it("opens the Evidence Pack module", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: "Evidence Pack Lesson 6" }));
+    await user.click(screen.getByRole("button", { name: "Tell the Story Lesson 6" }));
 
     expect(screen.getByRole("heading", { name: "Turn process into story." })).toBeInTheDocument();
   });
