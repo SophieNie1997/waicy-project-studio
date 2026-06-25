@@ -253,13 +253,12 @@ h1 {
   color: #4a3b18;
 }
 
+.primary-button,
 .secondary-button {
   width: 100%;
   border: 1px solid var(--ink);
   border-radius: 8px;
   padding: 12px 14px;
-  background: var(--surface);
-  color: var(--ink);
   font-weight: 800;
   cursor: pointer;
   text-align: center;
@@ -269,12 +268,29 @@ h1 {
     background 160ms ease;
 }
 
+.primary-button {
+  background: var(--ink);
+  color: white;
+}
+
+.secondary-button {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.primary-button:hover {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 84%, black);
+  transform: translateY(-1px);
+}
+
 .secondary-button:hover {
   background: var(--ink);
   color: white;
   transform: translateY(-1px);
 }
 
+.primary-button:disabled,
 .secondary-button:disabled {
   border-color: var(--line);
   background: color-mix(in srgb, var(--surface) 70%, var(--line));
@@ -294,8 +310,14 @@ h1 {
 
 .nav-button:focus-visible,
 .screen-step:focus-visible,
+.decision-dot:focus-visible,
+.prompt-chip:focus-visible,
+.primary-button:focus-visible,
 .secondary-button:focus-visible,
 .teacher-toggle:focus-visible,
+.project-identity-strip input:focus-visible,
+.builder-field input:focus-visible,
+.builder-field textarea:focus-visible,
 .field input:focus-visible,
 .field textarea:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--accent) 65%, white);
@@ -626,6 +648,271 @@ h1 {
   margin-top: 24px;
 }
 
+.idea-builder {
+  display: grid;
+  gap: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 247, 243, 0.98)),
+    var(--surface);
+}
+
+.idea-builder-topline {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.builder-kicker {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.idea-builder h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.75rem, 4vw, 3rem);
+  line-height: 0.95;
+}
+
+.builder-progress {
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: var(--accent-soft);
+  color: #4a3b18;
+  font-size: 0.8rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.project-identity-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+  gap: 10px;
+  border: 1px dashed color-mix(in srgb, var(--ink) 22%, var(--line));
+  border-radius: 8px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--accent-soft) 22%, white);
+}
+
+.project-identity-strip label,
+.builder-field {
+  display: grid;
+  gap: 7px;
+}
+
+.project-identity-strip span,
+.builder-field span {
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+
+.project-identity-strip input,
+.builder-field input,
+.builder-field textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: white;
+  color: var(--text);
+}
+
+.decision-rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.decision-dot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px;
+  background: white;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 900;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.decision-dot span {
+  display: inline-grid;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.decision-dot:hover {
+  border-color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.decision-dot.active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: white;
+}
+
+.decision-dot.active span {
+  background: var(--accent-soft);
+  color: #4a3b18;
+}
+
+.decision-dot.complete:not(.active) {
+  border-color: color-mix(in srgb, var(--ink) 30%, var(--line));
+  background: #eef7f1;
+}
+
+.decision-card {
+  display: grid;
+  gap: 16px;
+  overflow: hidden;
+  border-radius: 8px;
+  padding: 18px;
+  background:
+    linear-gradient(135deg, rgba(243, 223, 170, 0.12), transparent 30%),
+    linear-gradient(180deg, #173f35, #0f3028);
+  color: white;
+}
+
+.decision-card-copy {
+  max-width: 62ch;
+}
+
+.decision-card-copy .builder-kicker {
+  color: color-mix(in srgb, var(--accent-soft) 80%, white);
+}
+
+.decision-card-copy h3 {
+  margin: 0 0 8px;
+  font-size: clamp(1.6rem, 3vw, 2.45rem);
+  line-height: 0.98;
+}
+
+.decision-card-copy p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 1.08rem;
+  line-height: 1.42;
+}
+
+.decision-card-copy span {
+  display: block;
+  margin-top: 10px;
+  color: color-mix(in srgb, var(--accent-soft) 70%, white);
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.prompt-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prompt-chip {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.prompt-chip:hover {
+  border-color: var(--accent-soft);
+  background: rgba(243, 223, 170, 0.18);
+  transform: translateY(-1px);
+}
+
+.builder-field span {
+  color: white;
+}
+
+.builder-field input,
+.builder-field textarea {
+  min-height: 56px;
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.96);
+  font-size: 1.04rem;
+}
+
+.builder-field textarea {
+  min-height: 118px;
+  resize: vertical;
+}
+
+.builder-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.builder-actions .primary-button {
+  border-color: var(--accent-soft);
+  background: var(--accent-soft);
+  color: #4a3b18;
+}
+
+.builder-actions .primary-button:hover {
+  background: color-mix(in srgb, var(--accent-soft) 78%, white);
+}
+
+.live-brief {
+  display: grid;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--ink) 25%, var(--line));
+  border-radius: 8px;
+  padding: 14px;
+  background: white;
+}
+
+.live-brief p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.live-brief strong {
+  color: var(--ink);
+  font-size: 1.2rem;
+}
+
+.live-brief span {
+  color: var(--text);
+  line-height: 1.48;
+}
+
 .canvas-card {
   align-self: start;
   display: grid;
@@ -922,6 +1209,28 @@ h1 {
 
   .canvas-rule-strip-list {
     grid-template-columns: 1fr;
+  }
+
+  .idea-builder-topline,
+  .project-identity-strip,
+  .builder-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .idea-builder-topline {
+    display: grid;
+  }
+
+  .builder-progress {
+    justify-self: start;
+  }
+
+  .decision-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .decision-dot {
+    min-height: 52px;
   }
 
   h1 {

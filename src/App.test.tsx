@@ -81,6 +81,29 @@ describe("App", () => {
     expect(within(specificityCheck).queryByText("Focus")).not.toBeInTheDocument();
   });
 
+  it("turns the Product Canvas form into a step-by-step idea builder", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+
+    expect(screen.getByRole("heading", { name: "Idea Builder" })).toBeInTheDocument();
+    expect(screen.getByText("Decision 1 of 8")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Lunch sorting table" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Specific user")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Lunch sorting table" }));
+
+    expect(screen.getByLabelText("Problem")).toHaveValue("Lunch waste gets sorted wrong when the bins are crowded.");
+    expect(screen.getByText(/This project helps .*lunch waste gets sorted wrong/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Next decision" }));
+
+    expect(screen.getByText("Decision 2 of 8")).toBeInTheDocument();
+    expect(screen.getByLabelText("Specific user")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Problem")).not.toBeInTheDocument();
+  });
+
   it("shows website previews that open the original design references", () => {
     render(<App />);
 
