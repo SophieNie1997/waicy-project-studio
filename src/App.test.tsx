@@ -32,4 +32,13 @@ describe("App", () => {
 
     expect(screen.getByRole("button", { name: "Borrowed" })).toBeInTheDocument();
   });
+
+  it("shows Codex as locked before required student decisions are complete", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Codex Build Desk Lesson 5" }));
+
+    expect(screen.getByText("Codex is locked")).toBeInTheDocument();
+  });
 });

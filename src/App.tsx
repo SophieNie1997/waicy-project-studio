@@ -3,8 +3,10 @@ import { AppShell } from "./components/AppShell";
 import { createInitialProject } from "./domain/initialProject";
 import { exportProjectJson } from "./domain/storage";
 import type { ModuleId, StudioProject } from "./domain/types";
+import { CodexBuildDesk } from "./modules/CodexBuildDesk";
 import { DesignGallery } from "./modules/DesignGallery";
 import { ProductCanvas } from "./modules/ProductCanvas";
+import { UISketchLab } from "./modules/UISketchLab";
 
 function PlaceholderModule({ title }: { title: string }) {
   return (
@@ -29,11 +31,13 @@ export default function App() {
       <DesignGallery project={project} onChange={setProject} />
     ) : activeModule === "product-canvas" ? (
       <ProductCanvas project={project} onChange={setProject} />
+    ) : activeModule === "ui-sketch-lab" ? (
+      <UISketchLab project={project} onChange={setProject} />
+    ) : activeModule === "codex-build-desk" ? (
+      <CodexBuildDesk project={project} />
     ) : (
       <PlaceholderModule
         title={{
-          "ui-sketch-lab": "UI Sketch Lab",
-          "codex-build-desk": "Codex Build Desk",
           "test-iterate": "Test & Iterate",
           "evidence-pack": "Evidence Pack",
         }[activeModule]}
