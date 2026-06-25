@@ -37,6 +37,27 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Borrowed" })).toBeInTheDocument();
   });
 
+  it("shows website previews that open the original design references", () => {
+    render(<App />);
+
+    const expectedReferences = [
+      ["Apple", "https://www.apple.com/"],
+      ["Stripe", "https://stripe.com/"],
+      ["Linear", "https://linear.app/"],
+      ["Duolingo", "https://www.duolingo.com/"],
+    ];
+
+    expectedReferences.forEach(([name, url]) => {
+      const previewLink = screen.getByRole("link", { name: `Open ${name} website` });
+      const titleLink = screen.getByRole("link", { name: new RegExp(`^${name}:`) });
+
+      expect(previewLink).toHaveAttribute("href", url);
+      expect(previewLink).toHaveAttribute("target", "_blank");
+      expect(titleLink).toHaveAttribute("href", url);
+      expect(screen.getByRole("img", { name: `${name} website preview` })).toBeInTheDocument();
+    });
+  });
+
   it("shows Codex as locked before required student decisions are complete", async () => {
     const user = userEvent.setup();
     render(<App />);

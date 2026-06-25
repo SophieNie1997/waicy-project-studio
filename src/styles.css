@@ -317,29 +317,56 @@ h1 {
   color: var(--ink);
 }
 
-.reference-visual {
-  min-height: 118px;
-  display: grid;
-  align-content: end;
-  gap: 6px;
+.reference-preview {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 14px;
-  background:
-    linear-gradient(90deg, var(--surface) 0 42%, transparent 42%),
-    var(--accent-soft);
+  background: var(--surface);
   color: var(--ink);
+  text-decoration: none;
 }
 
-.reference-visual span {
-  font-size: 1.6rem;
+.reference-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    filter 160ms ease,
+    transform 160ms ease;
+}
+
+.reference-preview:hover img,
+.reference-preview:focus-visible img {
+  filter: saturate(1.08);
+  transform: scale(1.025);
+}
+
+.reference-open-label {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid rgba(20, 68, 55, 0.22);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font-size: 0.78rem;
   font-weight: 900;
 }
 
-.reference-visual small {
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--muted);
+.reference-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.reference-title-link:hover,
+.reference-title-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .canvas-layout {
