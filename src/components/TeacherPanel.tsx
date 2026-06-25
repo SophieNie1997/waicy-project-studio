@@ -1,3 +1,4 @@
+import type { ChangeEvent } from "react";
 import { canUnlockCodex, getProjectReadiness } from "../domain/readiness";
 import type { StudioProject } from "../domain/types";
 import { StatusPill } from "./StatusPill";
@@ -5,11 +6,18 @@ import { StatusPill } from "./StatusPill";
 interface TeacherPanelProps {
   project: StudioProject;
   onExport: () => void;
+  onImport: (file: File) => void;
 }
 
-export function TeacherPanel({ project, onExport }: TeacherPanelProps) {
+export function TeacherPanel({ project, onExport, onImport }: TeacherPanelProps) {
   const readiness = Object.values(getProjectReadiness(project));
   const unlocked = canUnlockCodex(project);
+
+  function handleImport(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (file) onImport(file);
+    event.target.value = "";
+  }
 
   return (
     <aside className="teacher-panel">
@@ -33,6 +41,10 @@ export function TeacherPanel({ project, onExport }: TeacherPanelProps) {
       <button className="secondary-button" onClick={onExport} type="button">
         Export JSON
       </button>
+      <label className="secondary-button file-button">
+        Import JSON
+        <input accept="application/json,.json" onChange={handleImport} type="file" />
+      </label>
     </aside>
   );
 }

@@ -9,14 +9,15 @@ interface AppShellProps {
   children: ReactNode;
   onModuleChange: (module: ModuleId) => void;
   onExport: () => void;
+  onImport: (file: File) => void;
 }
 
-export function AppShell({ activeModule, project, children, onModuleChange, onExport }: AppShellProps) {
+export function AppShell({ activeModule, project, children, onModuleChange, onExport, onImport }: AppShellProps) {
   return (
     <div className="studio-shell">
       <ModuleNav active={activeModule} onChange={onModuleChange} />
       <main className="workspace">{children}</main>
-      <TeacherPanel project={project} onExport={onExport} />
+      <TeacherPanel project={project} onExport={onExport} onImport={onImport} />
     </div>
   );
 }

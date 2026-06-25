@@ -92,10 +92,14 @@ p {
   color: var(--text);
   text-align: left;
   cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease;
 }
 
 .nav-button:hover {
   border-color: var(--ink);
+  transform: translateY(-1px);
 }
 
 .nav-button.active {
@@ -213,11 +217,39 @@ h1 {
   color: var(--ink);
   font-weight: 800;
   cursor: pointer;
+  text-align: center;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
 }
 
 .secondary-button:hover {
   background: var(--ink);
   color: white;
+  transform: translateY(-1px);
+}
+
+.file-button {
+  display: block;
+  margin-top: 10px;
+}
+
+.file-button input {
+  display: none;
+}
+
+.nav-button:focus-visible,
+.secondary-button:focus-visible,
+.field input:focus-visible,
+.field textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 65%, white);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--ink);
 }
 
 .field {

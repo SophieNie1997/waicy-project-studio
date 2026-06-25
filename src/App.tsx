@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "./components/AppShell";
-import { createInitialProject } from "./domain/initialProject";
-import { exportProjectJson } from "./domain/storage";
+import { exportProjectJson, importProjectJson, loadProject, saveProject } from "./domain/storage";
 import type { ModuleId, StudioProject } from "./domain/types";
 import { CodexBuildDesk } from "./modules/CodexBuildDesk";
 import { DesignGallery } from "./modules/DesignGallery";
@@ -12,10 +11,34 @@ import { UISketchLab } from "./modules/UISketchLab";
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<ModuleId>("design-gallery");
-  const [project, setProject] = useState<StudioProject>(() => createInitialProject());
+  const [project, setProject] = useState<StudioProject>(() => loadProject());
+
+  useEffect(() => {
+    saveProject(project);
+  }, [project]);
 
   function handleExport() {
-    void navigator.clipboard?.writeText(exportProjectJson(project));
+    const json = exportProjectJson(project);
+    const safeTitle = (project.title || "waicy-project-studio").replace(/[/:*?"<>|]+/g, "-");
+
+    void navigator.clipboard?.writeText(json);
+
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${safeTitle}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleImport(file: File) {
+    try {
+      const json = await file.text();
+      setProject(importProjectJson(json));
+    } catch {
+      window.alert("Could not import this JSON file.");
+    }
   }
 
   const moduleView =
@@ -34,7 +57,13 @@ export default function App() {
     );
 
   return (
-    <AppShell activeModule={activeModule} project={project} onModuleChange={setActiveModule} onExport={handleExport}>
+    <AppShell
+      activeModule={activeModule}
+      project={project}
+      onModuleChange={setActiveModule}
+      onExport={handleExport}
+      onImport={handleImport}
+    >
       {moduleView}
     </AppShell>
   );
