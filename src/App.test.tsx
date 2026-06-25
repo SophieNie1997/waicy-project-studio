@@ -21,6 +21,15 @@ describe("App", () => {
 
     await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
 
-    expect(screen.getByRole("heading", { name: "Product Canvas" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Make the idea buildable." })).toBeInTheDocument();
+  });
+
+  it("records a borrowed design principle", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getAllByRole("button", { name: "Borrow this rule" })[0]);
+
+    expect(screen.getByRole("button", { name: "Borrowed" })).toBeInTheDocument();
   });
 });

@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { AppShell } from "./components/AppShell";
 import { createInitialProject } from "./domain/initialProject";
 import { exportProjectJson } from "./domain/storage";
 import type { ModuleId, StudioProject } from "./domain/types";
+import { DesignGallery } from "./modules/DesignGallery";
+import { ProductCanvas } from "./modules/ProductCanvas";
 
 function PlaceholderModule({ title }: { title: string }) {
   return (
@@ -16,27 +18,31 @@ function PlaceholderModule({ title }: { title: string }) {
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<ModuleId>("design-gallery");
-  const [project] = useState<StudioProject>(() => createInitialProject());
-
-  const activeTitle = useMemo(() => {
-    const titles: Record<ModuleId, string> = {
-      "design-gallery": "Design Gallery",
-      "product-canvas": "Product Canvas",
-      "ui-sketch-lab": "UI Sketch Lab",
-      "codex-build-desk": "Codex Build Desk",
-      "test-iterate": "Test & Iterate",
-      "evidence-pack": "Evidence Pack",
-    };
-    return titles[activeModule];
-  }, [activeModule]);
+  const [project, setProject] = useState<StudioProject>(() => createInitialProject());
 
   function handleExport() {
     void navigator.clipboard?.writeText(exportProjectJson(project));
   }
 
+  const moduleView =
+    activeModule === "design-gallery" ? (
+      <DesignGallery project={project} onChange={setProject} />
+    ) : activeModule === "product-canvas" ? (
+      <ProductCanvas project={project} onChange={setProject} />
+    ) : (
+      <PlaceholderModule
+        title={{
+          "ui-sketch-lab": "UI Sketch Lab",
+          "codex-build-desk": "Codex Build Desk",
+          "test-iterate": "Test & Iterate",
+          "evidence-pack": "Evidence Pack",
+        }[activeModule]}
+      />
+    );
+
   return (
     <AppShell activeModule={activeModule} project={project} onModuleChange={setActiveModule} onExport={handleExport}>
-      <PlaceholderModule title={activeTitle} />
+      {moduleView}
     </AppShell>
   );
 }

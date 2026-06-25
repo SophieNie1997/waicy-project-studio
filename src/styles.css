@@ -245,6 +245,86 @@ h1 {
   resize: vertical;
 }
 
+.reference-grid,
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.reference-card,
+.canvas-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--surface-soft);
+}
+
+.reference-card {
+  display: grid;
+  gap: 12px;
+}
+
+.reference-card h2,
+.canvas-card h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.1rem;
+}
+
+.reference-card p,
+.canvas-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.reference-card strong,
+.canvas-card strong {
+  color: var(--ink);
+}
+
+.reference-visual {
+  min-height: 118px;
+  display: grid;
+  align-content: end;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background:
+    linear-gradient(90deg, var(--surface) 0 42%, transparent 42%),
+    var(--accent-soft);
+  color: var(--ink);
+}
+
+.reference-visual span {
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+
+.reference-visual small {
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.canvas-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.canvas-card {
+  align-self: start;
+  display: grid;
+  gap: 14px;
+  position: sticky;
+  top: 18px;
+}
+
 @media (max-width: 1100px) {
   .studio-shell {
     grid-template-columns: 1fr;
@@ -254,6 +334,18 @@ h1 {
   .teacher-panel {
     position: static;
     height: auto;
+  }
+
+  .canvas-card {
+    position: static;
+  }
+}
+
+@media (max-width: 900px) {
+  .reference-grid,
+  .form-grid,
+  .canvas-layout {
+    grid-template-columns: 1fr;
   }
 }
 
