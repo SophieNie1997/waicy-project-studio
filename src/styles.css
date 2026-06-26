@@ -793,6 +793,7 @@ h1 {
 .idea-confirm-box {
   display: grid;
   gap: 7px;
+  padding-top: 24px;
 }
 
 .idea-confirm-button {
@@ -1476,6 +1477,10 @@ h1 {
 
   .idea-builder-topline {
     display: grid;
+  }
+
+  .idea-confirm-box {
+    padding-top: 0;
   }
 
   .teacher-panel-floating {
