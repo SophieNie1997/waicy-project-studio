@@ -23,6 +23,22 @@ function createMockResponse() {
 }
 
 describe("Vercel idea choices API", () => {
+  it("returns a 405 JSON response when opened directly in the browser", async () => {
+    const req = {
+      method: "GET",
+      headers: {
+        origin: "https://sophienie1997.github.io",
+      },
+      url: "/api/idea-choices",
+    };
+    const res = createMockResponse();
+
+    await handler(req, res);
+
+    expect(res.statusCode).toBe(405);
+    expect(JSON.parse(res.body)).toEqual({ error: "Use POST for idea choices." });
+  });
+
   it("adapts a Vercel request to the shared model proxy handler", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
       new Response(

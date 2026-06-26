@@ -10,14 +10,16 @@ function toRequest(req) {
   const headers = new Headers();
   const origin = getHeader(req.headers, "origin");
   const contentType = getHeader(req.headers, "content-type") || "application/json";
+  const method = req.method || "POST";
+  const canHaveBody = !["GET", "HEAD", "OPTIONS"].includes(method.toUpperCase());
 
   if (origin) headers.set("Origin", origin);
   headers.set("Content-Type", contentType);
 
   return new Request(url, {
-    method: req.method || "POST",
+    method,
     headers,
-    body: req.method === "OPTIONS" ? undefined : JSON.stringify(req.body ?? {}),
+    body: canHaveBody ? JSON.stringify(req.body ?? {}) : undefined,
   });
 }
 
