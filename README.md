@@ -21,11 +21,41 @@ npm run dev
 ## Optional AI Idea Choices
 
 The Product Canvas can call a teacher-owned backend after students click `Confirm idea`.
-This repo includes a Cloudflare Worker template in `worker/`.
+The production frontend defaults to:
 
-### Deploy the Worker
+```bash
+https://waicy-project-studio-api.vercel.app/api/idea-choices
+```
+
+Create the Vercel backend with that project name so GitHub Pages can call it without extra frontend config.
+
+### Deploy on Vercel
+
+1. Create a new Vercel project from `SophieNie1997/waicy-project-studio`.
+2. Name the project `waicy-project-studio-api`.
+3. Open the project settings and add these environment variables for Production:
+
+```bash
+KKSJ_API_KEY=<your KKSJ key>
+KKSJ_BASE_URL=https://api.kksj.org/v1
+KKSJ_MODEL=gpt-4o-mini
+ALLOWED_ORIGIN=https://sophienie1997.github.io
+```
+
+4. Deploy. The API should be available at `/api/idea-choices`.
+
+The frontend can also call a custom backend if you set this at build time:
+
+```bash
+VITE_IDEA_CHOICES_ENDPOINT=https://your-backend.example.com/api/idea-choices
+```
+
+### Alternative: Deploy on Cloudflare Worker
+
+This repo also includes a Cloudflare Worker template in `worker/`.
 
 Copy the example config, then set the model key as a Worker secret:
+
 
 ```bash
 cp wrangler.example.toml wrangler.toml
@@ -41,12 +71,6 @@ The example config uses the OpenAI-compatible KKSJ endpoint:
 KKSJ_BASE_URL = "https://api.kksj.org/v1"
 KKSJ_MODEL = "gpt-4o-mini"
 ALLOWED_ORIGIN = "https://sophienie1997.github.io"
-```
-
-After deploy, set the frontend backend URL in `.env.local` or your build environment:
-
-```bash
-VITE_IDEA_CHOICES_ENDPOINT=https://your-worker-name.your-subdomain.workers.dev
 ```
 
 The frontend sends:

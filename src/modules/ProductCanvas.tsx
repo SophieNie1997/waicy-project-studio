@@ -267,6 +267,7 @@ const builderDecisions: BuilderDecision[] = [
 ];
 
 const REQUIRED_PAPER_SCREEN_IDS = ["start", "input", "ai-result", "human-review"] as const;
+const DEFAULT_PRODUCTION_IDEA_CHOICES_ENDPOINT = "https://waicy-project-studio-api.vercel.app/api/idea-choices";
 type RequiredPaperScreenId = (typeof REQUIRED_PAPER_SCREEN_IDS)[number];
 
 const readinessLabelByDecisionKey: Partial<Record<BuilderDecision["key"], string>> = {
@@ -543,8 +544,11 @@ function normalizeIdeaChoices(payload: unknown, fallback: IdeaChoiceSet): IdeaCh
 }
 
 function getIdeaChoicesEndpoint(): string {
-  const meta = import.meta as unknown as { env?: Record<string, string | undefined> };
-  return meta.env?.VITE_IDEA_CHOICES_ENDPOINT?.trim() ?? "";
+  const meta = import.meta as unknown as { env?: Record<string, string | boolean | undefined> };
+  const configuredEndpoint = typeof meta.env?.VITE_IDEA_CHOICES_ENDPOINT === "string" ? meta.env.VITE_IDEA_CHOICES_ENDPOINT.trim() : "";
+  if (configuredEndpoint) return configuredEndpoint;
+
+  return meta.env?.PROD ? DEFAULT_PRODUCTION_IDEA_CHOICES_ENDPOINT : "";
 }
 
 async function generateIdeaChoices(project: StudioProject): Promise<IdeaChoiceResult> {
