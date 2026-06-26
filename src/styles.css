@@ -49,13 +49,12 @@ p {
 .studio-shell {
   min-height: 100dvh;
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr) 260px;
+  grid-template-columns: 220px minmax(0, 1fr);
   gap: 16px;
   padding: 18px;
 }
 
 .module-nav,
-.teacher-panel,
 .module-panel {
   align-self: start;
   border: 1px solid var(--line);
@@ -63,8 +62,7 @@ p {
   background: var(--surface);
 }
 
-.module-nav,
-.teacher-panel {
+.module-nav {
   position: sticky;
   top: 18px;
   height: calc(100dvh - 36px);
@@ -170,6 +168,63 @@ h1 {
   margin-bottom: 0;
 }
 
+.teacher-panel-floating {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 40;
+  color: var(--text);
+}
+
+.teacher-panel-open {
+  width: min(330px, calc(100vw - 36px));
+  max-height: calc(100dvh - 36px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--surface);
+  box-shadow: 0 18px 44px rgba(23, 63, 53, 0.16);
+}
+
+.teacher-panel-collapsed {
+  width: auto;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.teacher-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--ink) 82%, white);
+  border-radius: 999px;
+  padding: 9px 13px;
+  background: var(--ink);
+  color: white;
+  font-weight: 900;
+  box-shadow: 0 12px 30px rgba(23, 63, 53, 0.18);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.teacher-tab:hover {
+  background: color-mix(in srgb, var(--ink) 88%, black);
+  transform: translateY(-1px);
+}
+
+.teacher-tab small {
+  border-radius: 999px;
+  padding: 3px 7px;
+  background: var(--accent-soft);
+  color: #4a3b18;
+  font-size: 0.74rem;
+}
+
 .teacher-toggle {
   width: 100%;
   border: 1px solid var(--ink);
@@ -195,11 +250,6 @@ h1 {
   padding: 14px;
   margin-bottom: 12px;
   background: var(--surface-soft);
-}
-
-.teacher-panel-collapsed {
-  height: auto;
-  min-height: 0;
 }
 
 .panel-card p {
@@ -300,11 +350,14 @@ h1 {
 }
 
 .file-button {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 45px;
   margin-top: 10px;
 }
 
-.file-button input {
+.file-input {
   display: none;
 }
 
@@ -1344,8 +1397,7 @@ h1 {
     grid-template-columns: 1fr;
   }
 
-  .module-nav,
-  .teacher-panel {
+  .module-nav {
     position: static;
     height: auto;
   }
@@ -1416,6 +1468,18 @@ h1 {
 
   .idea-builder-topline {
     display: grid;
+  }
+
+  .teacher-panel-floating {
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .teacher-panel-open {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: calc(100dvh - 24px);
   }
 
   .builder-progress {

@@ -236,17 +236,23 @@ describe("App", () => {
     expect(screen.getByText("Codex is locked")).toBeInTheDocument();
   });
 
-  it("keeps teacher tools folded until the teacher opens them", async () => {
+  it("keeps teacher tools in a small floating tab until the teacher opens them", async () => {
     const user = userEvent.setup();
     render(<App />);
 
+    const teacherPanel = screen.getByRole("complementary", { name: "Teacher mode" });
+    expect(teacherPanel).toHaveClass("teacher-panel-floating");
+    expect(teacherPanel).toHaveClass("teacher-panel-collapsed");
     expect(screen.getByText("Teacher mode")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Show teacher tools" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Show teacher tools" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("heading", { name: "Codex status" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Export JSON" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Show teacher tools" }));
 
-    expect(screen.getByRole("button", { name: "Hide teacher tools" })).toBeInTheDocument();
+    expect(teacherPanel).toHaveClass("teacher-panel-open");
+    expect(screen.getByRole("button", { name: "Hide teacher tools" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("heading", { name: "Codex status" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Export JSON" })).toBeInTheDocument();
   });
 
