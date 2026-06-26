@@ -77,7 +77,7 @@ describe("App", () => {
     expect(within(canvasRules).getByText("Check: title, seed idea, output.")).toBeInTheDocument();
     expect(within(canvasRules).getByText("Check: output and screen feedback.")).toBeInTheDocument();
 
-    const specificityCheck = screen.getByRole("complementary", { name: "Specificity check" });
+    const specificityCheck = screen.getByRole("complementary", { name: "Live project check" });
     expect(within(specificityCheck).queryByText("Focus")).not.toBeInTheDocument();
   });
 
@@ -102,6 +102,22 @@ describe("App", () => {
     expect(screen.getByText("Decision 2 of 8")).toBeInTheDocument();
     expect(screen.getByLabelText("Specific user")).toBeInTheDocument();
     expect(screen.queryByLabelText("Problem")).not.toBeInTheDocument();
+  });
+
+  it("updates the live project check as builder answers become ready", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+
+    const liveCheck = screen.getByRole("complementary", { name: "Live project check" });
+    expect(within(liveCheck).getByText("0/7 ready")).toBeInTheDocument();
+    expect(within(liveCheck).getByLabelText("Real problem: Needs work")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Lunch sorting table" }));
+
+    expect(within(liveCheck).getByText("1/7 ready")).toBeInTheDocument();
+    expect(within(liveCheck).getByLabelText("Real problem: Ready")).toBeInTheDocument();
   });
 
   it("shows website previews that open the original design references", () => {

@@ -643,8 +643,8 @@ h1 {
 
 .canvas-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) clamp(220px, 19vw, 260px);
+  gap: 14px;
   margin-top: 24px;
 }
 
@@ -919,6 +919,130 @@ h1 {
   gap: 14px;
   position: sticky;
   top: 18px;
+}
+
+.compact-readiness-card {
+  padding: 12px;
+}
+
+.compact-readiness-card .canvas-support-section {
+  gap: 10px;
+}
+
+.readiness-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.readiness-header h2 {
+  font-size: 1.08rem;
+  line-height: 1.05;
+}
+
+.readiness-count {
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: var(--ink);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.readiness-meter {
+  overflow: hidden;
+  height: 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--line) 70%, white);
+}
+
+.readiness-meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ink);
+  transition: width 180ms ease;
+}
+
+.readiness-meter-fill.progress-0 {
+  width: 0;
+}
+
+.readiness-meter-fill.progress-1 {
+  width: 14.2857%;
+}
+
+.readiness-meter-fill.progress-2 {
+  width: 28.5714%;
+}
+
+.readiness-meter-fill.progress-3 {
+  width: 42.8571%;
+}
+
+.readiness-meter-fill.progress-4 {
+  width: 57.1429%;
+}
+
+.readiness-meter-fill.progress-5 {
+  width: 71.4286%;
+}
+
+.readiness-meter-fill.progress-6 {
+  width: 85.7143%;
+}
+
+.readiness-meter-fill.progress-7 {
+  width: 100%;
+}
+
+.specificity-example {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 8px;
+  border-block: 1px solid color-mix(in srgb, var(--line) 70%, white);
+  padding-block: 8px;
+}
+
+.specificity-example span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.specificity-example strong {
+  color: var(--ink);
+  font-size: 0.86rem;
+  line-height: 1.2;
+}
+
+.compact-readiness-list {
+  gap: 6px;
+}
+
+.compact-readiness-list .readiness-row {
+  border-radius: 7px;
+  padding: 5px 0 5px 7px;
+  font-size: 0.84rem;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.compact-readiness-list .readiness-row.active {
+  background: rgba(243, 223, 170, 0.38);
+}
+
+.compact-readiness-list .readiness-row.ready {
+  color: var(--ink);
+}
+
+.compact-readiness-list .status-pill {
+  padding: 4px 7px;
+  font-size: 0.68rem;
 }
 
 .screen-grid {

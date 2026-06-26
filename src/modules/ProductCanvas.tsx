@@ -257,6 +257,15 @@ const builderDecisions: BuilderDecision[] = [
   },
 ];
 
+const readinessLabelByDecisionKey: Partial<Record<BuilderDecision["key"], string>> = {
+  problem: "Real problem",
+  user: "Specific user",
+  userMoment: "User moment",
+  aiAction: "AI action",
+  output: "Showable output",
+  responsibleAiNote: "Responsible AI",
+};
+
 function getCanvasRule(principle: string): CanvasDesignRule {
   return (
     canvasRulesByPrinciple.get(principle) ?? {
@@ -287,6 +296,8 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
   const activeDecision = builderDecisions[activeDecisionIndex];
   const activeValue = project[activeDecision.key];
   const completedDecisions = builderDecisions.filter((decision) => project[decision.key].trim()).length;
+  const readyCount = readiness.filter((item) => item.ready).length;
+  const activeReadinessLabel = readinessLabelByDecisionKey[activeDecision.key];
 
   function updateField<K extends keyof StudioProject>(key: K, value: StudioProject[K]) {
     onChange({ ...project, [key]: value });
@@ -445,18 +456,30 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
             <span>{buildBrief(project)}.</span>
           </aside>
         </section>
-        <aside className="canvas-card" aria-labelledby="specificity-check-heading">
+        <aside className="canvas-card compact-readiness-card" aria-label="Live project check">
           <section className="canvas-support-section">
-            <h2 id="specificity-check-heading">Specificity check</h2>
-            <p>
-              Too vague: <strong>An AI app to help the environment.</strong>
-            </p>
-            <p>
-              Buildable: <strong>A lunch waste helper for Grade 6 students near the sorting bins after lunch.</strong>
-            </p>
-            <div className="readiness-list">
+            <div className="readiness-header">
+              <h2 id="specificity-check-heading">Specificity check</h2>
+              <span className="readiness-count" aria-live="polite">
+                {readyCount}/{readiness.length} ready
+              </span>
+            </div>
+            <div className="readiness-meter" aria-hidden="true">
+              <span className={`readiness-meter-fill progress-${readyCount}`} />
+            </div>
+            <div className="specificity-example" aria-label="Specificity example">
+              <span>Too vague</span>
+              <strong>Help the environment</strong>
+              <span>Buildable</span>
+              <strong>Grade 6 lunch bins after lunch</strong>
+            </div>
+            <div className="readiness-list compact-readiness-list">
               {readiness.map((item) => (
-                <div className="readiness-row" key={item.label}>
+                <div
+                  className={`readiness-row ${item.ready ? "ready" : ""} ${item.label === activeReadinessLabel ? "active" : ""}`}
+                  key={item.label}
+                  aria-label={`${item.label}: ${item.ready ? "Ready" : "Needs work"}`}
+                >
                   <span>{item.label}</span>
                   <StatusPill ready={item.ready} label={item.ready ? "Ready" : "Needs work"} />
                 </div>
