@@ -6,3 +6,7 @@ coverage/
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts
+wrangler.toml
+.dev.vars
+.env
+.env.*

@@ -1,0 +1,8 @@
+name = "waicy-project-studio-idea-choices"
+main = "worker/index.mjs"
+compatibility_date = "2026-06-26"
+
+[vars]
+KKSJ_BASE_URL = "https://api.kksj.org/v1"
+KKSJ_MODEL = "gpt-4o-mini"
+ALLOWED_ORIGIN = "https://sophienie1997.github.io"

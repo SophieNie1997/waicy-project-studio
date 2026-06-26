@@ -21,10 +21,32 @@ npm run dev
 ## Optional AI Idea Choices
 
 The Product Canvas can call a teacher-owned backend after students click `Confirm idea`.
-Set the backend URL in `.env.local`:
+This repo includes a Cloudflare Worker template in `worker/`.
+
+### Deploy the Worker
+
+Copy the example config, then set the model key as a Worker secret:
 
 ```bash
-VITE_IDEA_CHOICES_ENDPOINT=https://your-backend.example.com/api/idea-choices
+cp wrangler.example.toml wrangler.toml
+npx wrangler secret put KKSJ_API_KEY --config wrangler.toml
+npx wrangler deploy --config wrangler.toml
+```
+
+Do not paste the key into `wrangler.toml`; keep it as a secret.
+
+The example config uses the OpenAI-compatible KKSJ endpoint:
+
+```toml
+KKSJ_BASE_URL = "https://api.kksj.org/v1"
+KKSJ_MODEL = "gpt-4o-mini"
+ALLOWED_ORIGIN = "https://sophienie1997.github.io"
+```
+
+After deploy, set the frontend backend URL in `.env.local` or your build environment:
+
+```bash
+VITE_IDEA_CHOICES_ENDPOINT=https://your-worker-name.your-subdomain.workers.dev
 ```
 
 The frontend sends:
