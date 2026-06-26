@@ -544,11 +544,10 @@ function normalizeIdeaChoices(payload: unknown, fallback: IdeaChoiceSet): IdeaCh
 }
 
 function getIdeaChoicesEndpoint(): string {
-  const meta = import.meta as unknown as { env?: Record<string, string | boolean | undefined> };
-  const configuredEndpoint = typeof meta.env?.VITE_IDEA_CHOICES_ENDPOINT === "string" ? meta.env.VITE_IDEA_CHOICES_ENDPOINT.trim() : "";
+  const configuredEndpoint = import.meta.env.VITE_IDEA_CHOICES_ENDPOINT?.trim() ?? "";
   if (configuredEndpoint) return configuredEndpoint;
 
-  return meta.env?.PROD ? DEFAULT_PRODUCTION_IDEA_CHOICES_ENDPOINT : "";
+  return import.meta.env.PROD ? DEFAULT_PRODUCTION_IDEA_CHOICES_ENDPOINT : "";
 }
 
 async function generateIdeaChoices(project: StudioProject): Promise<IdeaChoiceResult> {
