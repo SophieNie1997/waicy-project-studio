@@ -18,6 +18,39 @@ npm install
 npm run dev
 ```
 
+## Optional AI Idea Choices
+
+The Product Canvas can call a teacher-owned backend after students click `Confirm idea`.
+Set the backend URL in `.env.local`:
+
+```bash
+VITE_IDEA_CHOICES_ENDPOINT=https://your-backend.example.com/api/idea-choices
+```
+
+The frontend sends:
+
+```json
+{
+  "title": "Pet Clothes Helper",
+  "seedIdea": "Help students pick safe pet clothes",
+  "audience": "Grade 6 students building a paper-first AI app prototype",
+  "decisions": [{ "key": "problem", "label": "Problem", "choicesNeeded": 3 }]
+}
+```
+
+The backend should return:
+
+```json
+{
+  "choices": {
+    "problem": [{ "label": "Weather outfit panic", "value": "Students are unsure which pet clothing is safe for the weather." }],
+    "user": [{ "label": "First-time pet carers", "value": "Grade 6 students caring for a class pet during a busy school day." }]
+  }
+}
+```
+
+Never put a model API key in the Vite frontend environment. Keep it in the backend.
+
 ## Verify
 
 ```bash

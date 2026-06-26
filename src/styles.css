@@ -695,7 +695,8 @@ h1 {
 
 .project-identity-strip {
   display: grid;
-  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.15fr) minmax(140px, 0.42fr);
+  align-items: end;
   gap: 10px;
   border: 1px dashed color-mix(in srgb, var(--ink) 22%, var(--line));
   border-radius: 8px;
@@ -726,6 +727,37 @@ h1 {
   padding: 12px;
   background: white;
   color: var(--text);
+}
+
+.idea-confirm-box {
+  display: grid;
+  gap: 7px;
+}
+
+.idea-confirm-button {
+  min-height: 49px;
+  padding-inline: 12px;
+  background: var(--ink);
+  color: white;
+  white-space: normal;
+}
+
+.idea-confirm-button:hover {
+  background: #102f28;
+}
+
+.idea-choice-status {
+  min-height: 1.1rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.idea-choice-status.model,
+.idea-choice-status.backup {
+  color: var(--ink);
 }
 
 .decision-rail {

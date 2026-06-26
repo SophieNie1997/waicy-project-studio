@@ -20,6 +20,8 @@ interface BuilderPrompt {
   value: string;
 }
 
+type ChoiceGenerationStatus = "idle" | "loading" | "model" | "backup";
+
 interface BuilderDecision {
   key:
     | "problem"
@@ -37,6 +39,13 @@ interface BuilderDecision {
   placeholder: string;
   multiline?: boolean;
   prompts: BuilderPrompt[];
+}
+
+type IdeaChoiceSet = Partial<Record<BuilderDecision["key"], BuilderPrompt[]>>;
+
+interface IdeaChoiceResult {
+  choices: IdeaChoiceSet;
+  source: "model" | "backup";
 }
 
 const canvasRulesByPrinciple = new Map<string, CanvasDesignRule>([
@@ -351,7 +360,7 @@ function getProjectTopic(project: StudioProject): string {
   return "";
 }
 
-function getDecisionPrompts(decision: BuilderDecision, project: StudioProject): BuilderPrompt[] {
+function getBackupDecisionPrompts(decision: BuilderDecision, project: StudioProject): BuilderPrompt[] {
   const topic = getProjectTopic(project);
   if (!topic) return decision.prompts;
 
@@ -361,16 +370,16 @@ function getDecisionPrompts(decision: BuilderDecision, project: StudioProject): 
     case "problem":
       return [
         {
-          label: `${topic} confusion`,
-          value: `${topic} becomes confusing when students need to make a quick choice.`,
+          label: `${topic} tricky choice`,
+          value: `Students are not sure which ${topic} choice fits the real situation.`,
         },
         {
-          label: `${topic} slow moment`,
-          value: `Students lose time because ${seed.toLowerCase()} is hard to remember in the moment.`,
+          label: `${topic} comfort check`,
+          value: `Students need a quick way to check whether ${seed.toLowerCase()} is safe, fair, or comfortable.`,
         },
         {
-          label: `${topic} repeated questions`,
-          value: `Students keep asking the same question because ${topic} is not clear enough yet.`,
+          label: `${topic} repeated asks`,
+          value: `Students keep asking the same ${topic} question because the right next step is not visible.`,
         },
       ];
     case "user":
@@ -483,19 +492,137 @@ function getDecisionPrompts(decision: BuilderDecision, project: StudioProject): 
   }
 }
 
+function getBackupChoiceSet(project: StudioProject): IdeaChoiceSet {
+  return builderDecisions.reduce<IdeaChoiceSet>((choices, decision) => {
+    choices[decision.key] = getBackupDecisionPrompts(decision, project);
+    return choices;
+  }, {});
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function cleanChoiceText(value: unknown, maxLength: number): string {
+  if (typeof value !== "string") return "";
+  return value.trim().replace(/\s+/g, " ").slice(0, maxLength);
+}
+
+function normalizePromptList(value: unknown, fallback: BuilderPrompt[]): BuilderPrompt[] {
+  if (!Array.isArray(value)) return fallback;
+
+  const prompts = value
+    .map((item) => {
+      if (typeof item === "string") {
+        const text = cleanChoiceText(item, 180);
+        return { label: cleanChoiceText(text, 42), value: text };
+      }
+
+      if (!isRecord(item)) return null;
+
+      const label = cleanChoiceText(item.label, 42);
+      const promptValue = cleanChoiceText(item.value, 220);
+      if (!label || !promptValue) return null;
+
+      return { label, value: promptValue };
+    })
+    .filter((item): item is BuilderPrompt => item !== null)
+    .slice(0, 3);
+
+  return prompts.length > 0 ? prompts : fallback;
+}
+
+function normalizeIdeaChoices(payload: unknown, fallback: IdeaChoiceSet): IdeaChoiceSet {
+  const source = isRecord(payload) && isRecord(payload.choices) ? payload.choices : payload;
+
+  return builderDecisions.reduce<IdeaChoiceSet>((choices, decision) => {
+    const fallbackPrompts = fallback[decision.key] ?? decision.prompts;
+    choices[decision.key] = normalizePromptList(isRecord(source) ? source[decision.key] : undefined, fallbackPrompts);
+    return choices;
+  }, {});
+}
+
+function getIdeaChoicesEndpoint(): string {
+  const meta = import.meta as unknown as { env?: Record<string, string | undefined> };
+  return meta.env?.VITE_IDEA_CHOICES_ENDPOINT?.trim() ?? "";
+}
+
+async function generateIdeaChoices(project: StudioProject): Promise<IdeaChoiceResult> {
+  const fallback = getBackupChoiceSet(project);
+  const endpoint = getIdeaChoicesEndpoint();
+
+  if (!endpoint) {
+    return { choices: fallback, source: "backup" };
+  }
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: project.title,
+        seedIdea: project.seedIdea,
+        audience: "Grade 6 students building a paper-first AI app prototype",
+        decisions: builderDecisions.map(({ key, label, question, placeholder }) => ({
+          key,
+          label,
+          question,
+          placeholder,
+          choicesNeeded: 3,
+        })),
+      }),
+    });
+
+    if (!response.ok) {
+      return { choices: fallback, source: "backup" };
+    }
+
+    return {
+      choices: normalizeIdeaChoices(await response.json(), fallback),
+      source: "model",
+    };
+  } catch {
+    return { choices: fallback, source: "backup" };
+  }
+}
+
 export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
   const [activeDecisionIndex, setActiveDecisionIndex] = useState(0);
+  const [ideaChoices, setIdeaChoices] = useState<IdeaChoiceSet | null>(null);
+  const [choiceStatus, setChoiceStatus] = useState<ChoiceGenerationStatus>("idle");
   const readiness = Object.values(getProjectReadiness(project));
   const hasBorrowedPrinciples = project.borrowedPrinciples.length > 0;
   const activeDecision = builderDecisions[activeDecisionIndex];
   const activeValue = project[activeDecision.key];
-  const activePrompts = getDecisionPrompts(activeDecision, project);
+  const activePrompts = ideaChoices?.[activeDecision.key] ?? activeDecision.prompts;
   const completedDecisions = builderDecisions.filter((decision) => project[decision.key].trim()).length;
   const readyCount = readiness.filter((item) => item.ready).length;
   const activeReadinessLabel = readinessLabelByDecisionKey[activeDecision.key];
   const requiredPaperScreens = project.screens.filter((screen) => isRequiredPaperScreenId(screen.id));
+  const canConfirmIdea = isUsefulTopic(project.title) || isUsefulTopic(project.seedIdea);
+  const choiceStatusLabel =
+    choiceStatus === "loading"
+      ? "Generating choices"
+      : choiceStatus === "model"
+        ? "AI choices ready"
+        : choiceStatus === "backup"
+          ? "Backup choices ready"
+          : canConfirmIdea
+            ? "Ready to confirm"
+            : "Add title and seed";
+  const confirmButtonLabel =
+    choiceStatus === "loading"
+      ? "Generating choices"
+      : choiceStatus === "model" || choiceStatus === "backup"
+        ? "Regenerate choices"
+        : "Confirm idea";
 
   function updateField<K extends keyof StudioProject>(key: K, value: StudioProject[K]) {
+    if (key === "title" || key === "seedIdea") {
+      setIdeaChoices(null);
+      setChoiceStatus("idle");
+    }
+
     onChange({ ...project, [key]: value });
   }
 
@@ -523,6 +650,15 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
         };
       }),
     });
+  }
+
+  async function handleConfirmIdea() {
+    if (!canConfirmIdea || choiceStatus === "loading") return;
+
+    setChoiceStatus("loading");
+    const result = await generateIdeaChoices(project);
+    setIdeaChoices(result.choices);
+    setChoiceStatus(result.source === "model" ? "model" : "backup");
   }
 
   return (
@@ -582,6 +718,21 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
                 onChange={(event) => updateField("seedIdea", event.target.value)}
               />
             </label>
+            <div className="idea-confirm-box">
+              <button
+                className="primary-button idea-confirm-button"
+                type="button"
+                disabled={!canConfirmIdea || choiceStatus === "loading"}
+                onClick={() => {
+                  void handleConfirmIdea();
+                }}
+              >
+                {confirmButtonLabel}
+              </button>
+              <span className={`idea-choice-status ${choiceStatus}`} role="status" aria-live="polite">
+                {choiceStatusLabel}
+              </span>
+            </div>
           </div>
 
           <div className="decision-rail" aria-label="Idea Builder decisions">

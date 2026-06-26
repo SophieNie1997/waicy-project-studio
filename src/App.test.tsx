@@ -1,11 +1,17 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
 describe("App", () => {
   beforeEach(() => {
     localStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it("renders the six student-facing project quest modules", () => {
@@ -104,19 +110,67 @@ describe("App", () => {
     expect(screen.queryByLabelText("Problem")).not.toBeInTheDocument();
   });
 
-  it("adapts idea starter buttons to the project title and seed idea", async () => {
+  it("generates idea starter buttons only after students confirm the title and seed idea", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        choices: {
+          problem: [
+            {
+              label: "Weather outfit panic",
+              value: "Students are unsure which pet clothing is safe for the weather and the pet.",
+            },
+          ],
+          user: [
+            {
+              label: "First-time pet carers",
+              value: "Grade 6 students caring for a class pet during a busy school day.",
+            },
+          ],
+        },
+      }),
+    });
+
+    vi.stubEnv("VITE_IDEA_CHOICES_ENDPOINT", "/api/idea-choices");
+    vi.stubGlobal("fetch", fetchMock);
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+    await user.type(screen.getByLabelText("Project title"), "Pet Clothes Helper");
+    await user.type(screen.getByLabelText("Seed idea"), "Help students pick safe pet clothes for weather and comfort");
+
+    expect(screen.queryByRole("button", { name: "Weather outfit panic" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Confirm idea" }));
+
+    expect(await screen.findByRole("button", { name: "Weather outfit panic" })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("AI choices ready");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/idea-choices",
+      expect.objectContaining({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: expect.stringContaining("Pet Clothes Helper"),
+      }),
+    );
+
+    await user.click(screen.getByRole("button", { name: "Next decision" }));
+
+    expect(screen.getByRole("button", { name: "First-time pet carers" })).toBeInTheDocument();
+  });
+
+  it("uses classroom backup choices when the model endpoint is not configured", async () => {
     const user = userEvent.setup();
     render(<App />);
 
     await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
-    await user.type(screen.getByLabelText("Project title"), "Pet Patrol");
-    await user.type(screen.getByLabelText("Seed idea"), "Help students remember class pet care jobs");
+    await user.type(screen.getByLabelText("Project title"), "Pet Clothes");
+    await user.type(screen.getByLabelText("Seed idea"), "Help students choose pet outfits");
+    await user.click(screen.getByRole("button", { name: "Confirm idea" }));
 
-    expect(screen.getByRole("button", { name: "Pet Patrol confusion" })).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Next decision" }));
-
-    expect(screen.getByRole("button", { name: "Pet Patrol first users" })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Backup choices ready");
+    expect(screen.getByRole("button", { name: "Pet Clothes tricky choice" })).toBeInTheDocument();
   });
 
   it("updates the live project check as builder answers become ready", async () => {
