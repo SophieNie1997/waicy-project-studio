@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { MissionBanner } from "../components/MissionBanner";
 import { StatusPill } from "../components/StatusPill";
 import { getProjectReadiness } from "../domain/readiness";
@@ -593,6 +593,7 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
   const [activeDecisionIndex, setActiveDecisionIndex] = useState(0);
   const [ideaChoices, setIdeaChoices] = useState<IdeaChoiceSet | null>(null);
   const [choiceStatus, setChoiceStatus] = useState<ChoiceGenerationStatus>("idle");
+  const seedIdeaRef = useRef<HTMLTextAreaElement>(null);
   const readiness = Object.values(getProjectReadiness(project));
   const hasBorrowedPrinciples = project.borrowedPrinciples.length > 0;
   const activeDecision = builderDecisions[activeDecisionIndex];
@@ -619,6 +620,16 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
       : choiceStatus === "model" || choiceStatus === "backup"
         ? "Regenerate choices"
         : "Confirm idea";
+
+  useLayoutEffect(() => {
+    resizeSeedIdeaField(seedIdeaRef.current);
+  }, [project.seedIdea]);
+
+  function resizeSeedIdeaField(field: HTMLTextAreaElement | null) {
+    if (!field) return;
+    field.style.height = "auto";
+    field.style.height = `${field.scrollHeight}px`;
+  }
 
   function updateField<K extends keyof StudioProject>(key: K, value: StudioProject[K]) {
     if (key === "title" || key === "seedIdea") {
@@ -715,10 +726,16 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
             </label>
             <label>
               <span>Seed idea</span>
-              <input
+              <textarea
+                ref={seedIdeaRef}
+                className="seed-idea-textarea"
+                rows={2}
                 value={project.seedIdea}
                 placeholder="A small idea worth investigating"
-                onChange={(event) => updateField("seedIdea", event.target.value)}
+                onChange={(event) => {
+                  updateField("seedIdea", event.target.value);
+                  resizeSeedIdeaField(event.currentTarget);
+                }}
               />
             </label>
             <div className="idea-confirm-box">

@@ -173,6 +173,24 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Pet Clothes tricky choice" })).toBeInTheDocument();
   });
 
+  it("uses a multiline seed idea field so longer ideas wrap in place", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+
+    const seedIdeaField = screen.getByLabelText("Seed idea");
+    expect(seedIdeaField.tagName).toBe("TEXTAREA");
+    expect(seedIdeaField).toHaveClass("seed-idea-textarea");
+    expect(seedIdeaField).toHaveAttribute("rows", "2");
+
+    await user.type(seedIdeaField, "Help Grade 6 class pet helpers choose safe and comfortable clothes for rainy days, hot days, and school events.");
+
+    expect(seedIdeaField).toHaveValue(
+      "Help Grade 6 class pet helpers choose safe and comfortable clothes for rainy days, hot days, and school events.",
+    );
+  });
+
   it("updates the live project check as builder answers become ready", async () => {
     const user = userEvent.setup();
     render(<App />);

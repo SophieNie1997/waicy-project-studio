@@ -749,7 +749,7 @@ h1 {
 .project-identity-strip {
   display: grid;
   grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.15fr) minmax(140px, 0.42fr);
-  align-items: end;
+  align-items: start;
   gap: 10px;
   border: 1px dashed color-mix(in srgb, var(--ink) 22%, var(--line));
   border-radius: 8px;
@@ -771,6 +771,7 @@ h1 {
 }
 
 .project-identity-strip input,
+.project-identity-strip textarea,
 .builder-field input,
 .builder-field textarea,
 .paper-screen-field input {
@@ -780,6 +781,13 @@ h1 {
   padding: 12px;
   background: white;
   color: var(--text);
+}
+
+.seed-idea-textarea {
+  min-height: 54px;
+  line-height: 1.35;
+  overflow: hidden;
+  resize: none;
 }
 
 .idea-confirm-box {
