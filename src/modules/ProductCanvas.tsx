@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MissionBanner } from "../components/MissionBanner";
 import { StatusPill } from "../components/StatusPill";
 import { getProjectReadiness } from "../domain/readiness";
-import type { StudioProject } from "../domain/types";
+import type { StudioProject, StudioScreen } from "../domain/types";
 
 interface ProductCanvasProps {
   project: StudioProject;
@@ -257,6 +257,9 @@ const builderDecisions: BuilderDecision[] = [
   },
 ];
 
+const REQUIRED_PAPER_SCREEN_IDS = ["start", "input", "ai-result", "human-review"] as const;
+type RequiredPaperScreenId = (typeof REQUIRED_PAPER_SCREEN_IDS)[number];
+
 const readinessLabelByDecisionKey: Partial<Record<BuilderDecision["key"], string>> = {
   problem: "Real problem",
   user: "Specific user",
@@ -265,6 +268,41 @@ const readinessLabelByDecisionKey: Partial<Record<BuilderDecision["key"], string
   output: "Showable output",
   responsibleAiNote: "Responsible AI",
 };
+
+const screenDraftsById: Record<RequiredPaperScreenId, Pick<StudioScreen, "job" | "userAction" | "mainButtonLabel" | "feedbackState" | "trustSignal">> = {
+  start: {
+    job: "Introduce the project and show who it helps.",
+    userAction: "Read the promise and choose to start.",
+    mainButtonLabel: "Start",
+    feedbackState: "The app moves into the first useful step.",
+    trustSignal: "The page says this is a student prototype.",
+  },
+  input: {
+    job: "Collect the simple information the AI needs.",
+    userAction: "Add one photo, choice, or short note.",
+    mainButtonLabel: "Check it",
+    feedbackState: "The app shows that the input was received.",
+    trustSignal: "The page explains what information is used.",
+  },
+  "ai-result": {
+    job: "Show the AI result in a clear way.",
+    userAction: "Read the result and compare it with the reason.",
+    mainButtonLabel: "Use this",
+    feedbackState: "The app highlights the recommended next step.",
+    trustSignal: "The page shows a reason and confidence note.",
+  },
+  "human-review": {
+    job: "Let a person check or correct the AI answer.",
+    userAction: "Choose confirm, change, or ask for help.",
+    mainButtonLabel: "Review",
+    feedbackState: "The app records the human decision.",
+    trustSignal: "The page reminds users that people make the final call.",
+  },
+};
+
+function isRequiredPaperScreenId(id: StudioScreen["id"]): id is RequiredPaperScreenId {
+  return REQUIRED_PAPER_SCREEN_IDS.includes(id as RequiredPaperScreenId);
+}
 
 function getCanvasRule(principle: string): CanvasDesignRule {
   return (
@@ -289,15 +327,173 @@ function buildBrief(project: StudioProject): string {
   return `This project helps ${user} when this happens: ${problemSentence} They open it ${moment}, give it ${input}, and the AI will ${aiAction}. The screen shows ${output} so ${impact}`;
 }
 
+function isUsefulTopic(value: string): boolean {
+  const trimmed = value.trim();
+  const latinLetters = trimmed.match(/[a-z]/gi)?.length ?? 0;
+  const cjkCharacters = trimmed.match(/\p{Script=Han}/gu)?.length ?? 0;
+
+  return latinLetters >= 3 || cjkCharacters >= 2;
+}
+
+function shortenTopic(value: string): string {
+  return value
+    .trim()
+    .replace(/\s+/g, " ")
+    .split(" ")
+    .slice(0, 4)
+    .join(" ");
+}
+
+function getProjectTopic(project: StudioProject): string {
+  if (isUsefulTopic(project.title)) return shortenTopic(project.title);
+  if (isUsefulTopic(project.seedIdea)) return shortenTopic(project.seedIdea);
+
+  return "";
+}
+
+function getDecisionPrompts(decision: BuilderDecision, project: StudioProject): BuilderPrompt[] {
+  const topic = getProjectTopic(project);
+  if (!topic) return decision.prompts;
+
+  const seed = project.seedIdea.trim() || `${topic} idea`;
+
+  switch (decision.key) {
+    case "problem":
+      return [
+        {
+          label: `${topic} confusion`,
+          value: `${topic} becomes confusing when students need to make a quick choice.`,
+        },
+        {
+          label: `${topic} slow moment`,
+          value: `Students lose time because ${seed.toLowerCase()} is hard to remember in the moment.`,
+        },
+        {
+          label: `${topic} repeated questions`,
+          value: `Students keep asking the same question because ${topic} is not clear enough yet.`,
+        },
+      ];
+    case "user":
+      return [
+        {
+          label: `${topic} first users`,
+          value: `Grade 6 students who are trying ${topic} for the first time.`,
+        },
+        {
+          label: `${topic} helpers`,
+          value: `Student helpers responsible for making ${topic} work during a busy school day.`,
+        },
+        {
+          label: `${topic} team leaders`,
+          value: `Team leaders who need to guide classmates through ${topic}.`,
+        },
+      ];
+    case "userMoment":
+      return [
+        {
+          label: `${topic} start moment`,
+          value: `At the moment students are about to use ${topic} and are not sure what to do first.`,
+        },
+        {
+          label: `${topic} busy moment`,
+          value: `During a busy school moment when there is not much time to ask a teacher.`,
+        },
+        {
+          label: `${topic} check moment`,
+          value: `Right before students need to confirm whether their ${topic} choice is correct.`,
+        },
+      ];
+    case "input":
+      return [
+        {
+          label: `${topic} photo`,
+          value: `A quick photo or visual clue connected to ${topic}.`,
+        },
+        {
+          label: `${topic} choices`,
+          value: `Two or three simple choices about what is happening in ${topic}.`,
+        },
+        {
+          label: `${topic} note`,
+          value: `One short note describing the student's ${topic} situation.`,
+        },
+      ];
+    case "aiAction":
+      return [
+        {
+          label: `${topic} classify`,
+          value: `Classify the ${topic} situation and explain the best next step.`,
+        },
+        {
+          label: `${topic} recommend`,
+          value: `Recommend one useful action for ${topic} with a short reason.`,
+        },
+        {
+          label: `${topic} plan`,
+          value: `Generate a short ${topic} plan the student can follow immediately.`,
+        },
+      ];
+    case "output":
+      return [
+        {
+          label: `${topic} answer card`,
+          value: `A clear ${topic} answer card with one reason and a next-step button.`,
+        },
+        {
+          label: `${topic} checklist`,
+          value: `A short ${topic} checklist with the next three actions.`,
+        },
+        {
+          label: `${topic} confidence note`,
+          value: `A recommendation for ${topic} with a confidence level and human-check reminder.`,
+        },
+      ];
+    case "impact":
+      return [
+        {
+          label: `${topic} faster`,
+          value: `Students make the ${topic} decision faster and need fewer repeated reminders.`,
+        },
+        {
+          label: `${topic} calmer`,
+          value: `Students feel calmer because the next ${topic} step is visible.`,
+        },
+        {
+          label: `${topic} clearer`,
+          value: `The class has a clearer shared way to handle ${topic}.`,
+        },
+      ];
+    case "responsibleAiNote":
+      return [
+        {
+          label: `${topic} teacher check`,
+          value: `If the AI is unsure about ${topic}, the student should check with a teacher.`,
+        },
+        {
+          label: `${topic} privacy`,
+          value: `The prototype should not store private student information while helping with ${topic}.`,
+        },
+        {
+          label: `${topic} explain why`,
+          value: `The app should explain why it gives a ${topic} answer instead of only showing the answer.`,
+        },
+      ];
+    default:
+      return decision.prompts;
+  }
+}
+
 export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
   const [activeDecisionIndex, setActiveDecisionIndex] = useState(0);
   const readiness = Object.values(getProjectReadiness(project));
   const hasBorrowedPrinciples = project.borrowedPrinciples.length > 0;
   const activeDecision = builderDecisions[activeDecisionIndex];
   const activeValue = project[activeDecision.key];
+  const activePrompts = getDecisionPrompts(activeDecision, project);
   const completedDecisions = builderDecisions.filter((decision) => project[decision.key].trim()).length;
   const readyCount = readiness.filter((item) => item.ready).length;
   const activeReadinessLabel = readinessLabelByDecisionKey[activeDecision.key];
+  const requiredPaperScreens = project.screens.filter((screen) => isRequiredPaperScreenId(screen.id));
 
   function updateField<K extends keyof StudioProject>(key: K, value: StudioProject[K]) {
     onChange({ ...project, [key]: value });
@@ -309,6 +505,24 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
 
   function moveDecision(direction: 1 | -1) {
     setActiveDecisionIndex((current) => Math.min(Math.max(current + direction, 0), builderDecisions.length - 1));
+  }
+
+  function updateScreenSketchReference(id: StudioScreen["id"], value: string) {
+    onChange({
+      ...project,
+      screens: project.screens.map((screen) => {
+        if (screen.id !== id) return screen;
+        if (!isRequiredPaperScreenId(screen.id)) {
+          return { ...screen, paperSketchReference: value };
+        }
+
+        return {
+          ...screen,
+          ...screenDraftsById[screen.id],
+          paperSketchReference: value,
+        };
+      }),
+    });
   }
 
   return (
@@ -399,7 +613,7 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
             </div>
 
             <div className="prompt-chip-row" aria-label={`${activeDecision.label} idea starters`}>
-              {activeDecision.prompts.map((prompt) => (
+              {activePrompts.map((prompt) => (
                 <button
                   className="prompt-chip"
                   key={prompt.label}
@@ -455,6 +669,26 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
             <strong>{project.title.trim() || "Untitled project"}</strong>
             <span>{buildBrief(project)}.</span>
           </aside>
+
+          <section className="paper-plan-panel" aria-labelledby="paper-plan-heading">
+            <div className="paper-plan-copy">
+              <p className="builder-kicker">Paper-first screen list</p>
+              <h3 id="paper-plan-heading">Name the paper sketches</h3>
+              <p>Draw these four screens on paper, then type the page or photo reference here.</p>
+            </div>
+            <div className="paper-plan-grid">
+              {requiredPaperScreens.map((screen, index) => (
+                <label className="paper-screen-field" key={screen.id}>
+                  <span>{screen.name} sketch ref</span>
+                  <input
+                    value={screen.paperSketchReference}
+                    placeholder={`Paper ${index + 1} or photo ${String.fromCharCode(65 + index)}`}
+                    onChange={(event) => updateScreenSketchReference(screen.id, event.target.value)}
+                  />
+                </label>
+              ))}
+            </div>
+          </section>
         </section>
         <aside className="canvas-card compact-readiness-card" aria-label="Live project check">
           <section className="canvas-support-section">

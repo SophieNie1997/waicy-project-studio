@@ -318,6 +318,7 @@ h1 {
 .project-identity-strip input:focus-visible,
 .builder-field input:focus-visible,
 .builder-field textarea:focus-visible,
+.paper-screen-field input:focus-visible,
 .field input:focus-visible,
 .field textarea:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--accent) 65%, white);
@@ -717,7 +718,8 @@ h1 {
 
 .project-identity-strip input,
 .builder-field input,
-.builder-field textarea {
+.builder-field textarea,
+.paper-screen-field input {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -911,6 +913,45 @@ h1 {
 .live-brief span {
   color: var(--text);
   line-height: 1.48;
+}
+
+.paper-plan-panel {
+  display: grid;
+  gap: 12px;
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, var(--line));
+  border-radius: 8px;
+  padding: 14px;
+  background: color-mix(in srgb, var(--surface-soft) 76%, white);
+}
+
+.paper-plan-copy h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.2rem;
+  line-height: 1.1;
+}
+
+.paper-plan-copy p:not(.builder-kicker) {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.paper-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.paper-screen-field {
+  display: grid;
+  gap: 6px;
+}
+
+.paper-screen-field span {
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 900;
 }
 
 .canvas-card {
@@ -1351,6 +1392,10 @@ h1 {
 
   .decision-rail {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .paper-plan-grid {
+    grid-template-columns: 1fr;
   }
 
   .decision-dot {

@@ -104,6 +104,21 @@ describe("App", () => {
     expect(screen.queryByLabelText("Problem")).not.toBeInTheDocument();
   });
 
+  it("adapts idea starter buttons to the project title and seed idea", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+    await user.type(screen.getByLabelText("Project title"), "Pet Patrol");
+    await user.type(screen.getByLabelText("Seed idea"), "Help students remember class pet care jobs");
+
+    expect(screen.getByRole("button", { name: "Pet Patrol confusion" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Next decision" }));
+
+    expect(screen.getByRole("button", { name: "Pet Patrol first users" })).toBeInTheDocument();
+  });
+
   it("updates the live project check as builder answers become ready", async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -118,6 +133,23 @@ describe("App", () => {
 
     expect(within(liveCheck).getByText("1/7 ready")).toBeInTheDocument();
     expect(within(liveCheck).getByLabelText("Real problem: Ready")).toBeInTheDocument();
+  });
+
+  it("lets students complete the paper-first screen list from the Product Canvas", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+
+    const liveCheck = screen.getByRole("complementary", { name: "Live project check" });
+    expect(within(liveCheck).getByLabelText("Paper-first screen list: Needs work")).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Start sketch ref"), "Paper 1");
+    await user.type(screen.getByLabelText("Input sketch ref"), "Paper 2");
+    await user.type(screen.getByLabelText("AI Result sketch ref"), "Paper 3");
+    await user.type(screen.getByLabelText("Human Review sketch ref"), "Paper 4");
+
+    expect(within(liveCheck).getByLabelText("Paper-first screen list: Ready")).toBeInTheDocument();
   });
 
   it("shows website previews that open the original design references", () => {
