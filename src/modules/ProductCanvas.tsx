@@ -677,7 +677,7 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
 
   return (
     <section className="module-panel">
-      <p className="eyebrow">Make Idea Real</p>
+      <p className="eyebrow">Product Canvas</p>
       <h1>Make the idea buildable.</h1>
       <p className="lede">Codex stays locked until the project is specific enough to explain in 20 seconds.</p>
       <MissionBanner

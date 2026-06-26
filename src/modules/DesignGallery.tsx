@@ -90,7 +90,7 @@ export function DesignGallery({ project, onChange, onContinue }: DesignGalleryPr
                 <strong>Next step:</strong> {nextStepGuidance}
               </p>
               <button className="secondary-button compact-action" type="button" onClick={onContinue}>
-                Make Idea Real
+                Product Canvas
               </button>
             </div>
           </>

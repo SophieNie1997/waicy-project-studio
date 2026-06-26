@@ -2,7 +2,7 @@ import type { ModuleId } from "../domain/types";
 
 export const modules: Array<{ id: ModuleId; label: string; lesson: string }> = [
   { id: "design-gallery", label: "Find Design Moves", lesson: "Lesson 4" },
-  { id: "product-canvas", label: "Make Idea Real", lesson: "Lesson 4" },
+  { id: "product-canvas", label: "Product Canvas", lesson: "Lesson 4" },
   { id: "ui-sketch-lab", label: "Draw App Screens", lesson: "Lesson 5" },
   { id: "codex-build-desk", label: "Build with Codex", lesson: "Lesson 5" },
   { id: "test-iterate", label: "Test and Improve", lesson: "Lesson 6" },

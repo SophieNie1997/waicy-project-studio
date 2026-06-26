@@ -19,7 +19,8 @@ describe("App", () => {
 
     expect(screen.getByText("Project Quest")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Find Design Moves Lesson 4" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Make Idea Real Lesson 4" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Product Canvas Lesson 4" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Make Idea Real Lesson 4" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Draw App Screens Lesson 5" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Build with Codex Lesson 5" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Test and Improve Lesson 6" })).toBeInTheDocument();
@@ -32,7 +33,7 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+    await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
 
     expect(screen.getByRole("heading", { name: "Make the idea buildable." })).toBeInTheDocument();
     expect(screen.getByText("Make one idea specific enough that another person can picture it.")).toBeInTheDocument();
@@ -48,7 +49,7 @@ describe("App", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Design move collected");
     expect(screen.getByRole("status")).toHaveTextContent("1 move in your toolkit");
     expect(screen.getByRole("status")).toHaveTextContent("Next step");
-    expect(screen.getByRole("button", { name: "Make Idea Real" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Product Canvas" })).toBeInTheDocument();
     expect(screen.getAllByText("One product, one main message, one clear action.")).toHaveLength(2);
   });
 
@@ -57,7 +58,7 @@ describe("App", () => {
     render(<App />);
 
     await user.click(screen.getAllByRole("button", { name: "Borrow this rule" })[0]);
-    await user.click(screen.getByRole("button", { name: "Make Idea Real" }));
+    await user.click(screen.getByRole("button", { name: "Product Canvas" }));
 
     expect(screen.getByRole("heading", { name: "Make the idea buildable." })).toBeInTheDocument();
   });
@@ -70,7 +71,7 @@ describe("App", () => {
     for (const button of borrowButtons) {
       await user.click(button);
     }
-    await user.click(screen.getByRole("button", { name: "Make Idea Real" }));
+    await user.click(screen.getByRole("button", { name: "Product Canvas" }));
 
     expect(screen.getByRole("heading", { name: "Design moves you collected" })).toBeInTheDocument();
     expect(screen.getByText("Use these moves while you make product decisions.")).toBeInTheDocument();
@@ -91,7 +92,7 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+    await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
 
     expect(screen.getByRole("heading", { name: "Idea Builder" })).toBeInTheDocument();
     expect(screen.getByText("Decision 1 of 8")).toBeInTheDocument();
@@ -136,7 +137,7 @@ describe("App", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+    await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
     await user.type(screen.getByLabelText("Project title"), "Pet Clothes Helper");
     await user.type(screen.getByLabelText("Seed idea"), "Help students pick safe pet clothes for weather and comfort");
 
@@ -164,7 +165,7 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+    await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
     await user.type(screen.getByLabelText("Project title"), "Pet Clothes");
     await user.type(screen.getByLabelText("Seed idea"), "Help students choose pet outfits");
     await user.click(screen.getByRole("button", { name: "Confirm idea" }));
@@ -177,7 +178,7 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+    await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
 
     const seedIdeaField = screen.getByLabelText("Seed idea");
     expect(seedIdeaField.tagName).toBe("TEXTAREA");
@@ -195,7 +196,7 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+    await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
 
     const liveCheck = screen.getByRole("complementary", { name: "Live project check" });
     expect(within(liveCheck).getByText("0/7 ready")).toBeInTheDocument();
@@ -211,7 +212,7 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: "Make Idea Real Lesson 4" }));
+    await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
 
     const liveCheck = screen.getByRole("complementary", { name: "Live project check" });
     expect(within(liveCheck).getByLabelText("Paper-first screen list: Needs work")).toBeInTheDocument();
