@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="WAICY Project Studio">
+  <rect width="64" height="64" rx="14" fill="#173f35"/>
+  <path d="M14 19h9l5 20 5-20h7l5 20 5-20h8L49 48h-8l-5-18-5 18h-8L14 19Z" fill="#f3dfaa"/>
+  <circle cx="47" cy="17" r="4" fill="#d7ad4a"/>
+</svg>
