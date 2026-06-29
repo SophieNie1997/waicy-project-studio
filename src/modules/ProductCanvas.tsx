@@ -41,6 +41,15 @@ interface InterestMission {
 }
 
 type ChoiceGenerationStatus = "idle" | "loading" | "model" | "backup";
+type CanvasFlowStepId = "mission" | "builder" | "check" | "screens";
+
+interface CanvasFlowStep {
+  id: CanvasFlowStepId;
+  label: string;
+  stepLabel: string;
+  title: string;
+  detail: string;
+}
 
 interface BuilderDecision {
   key:
@@ -67,6 +76,37 @@ interface IdeaChoiceResult {
   choices: IdeaChoiceSet;
   source: "model" | "backup";
 }
+
+const canvasFlowSteps: CanvasFlowStep[] = [
+  {
+    id: "mission",
+    label: "Pick mission",
+    stepLabel: "Step 1 of 4",
+    title: "Pick your mission",
+    detail: "Choose one starting point from the student's interests, or open a blank idea if they already have one.",
+  },
+  {
+    id: "builder",
+    label: "Make it specific",
+    stepLabel: "Step 2 of 4",
+    title: "Make it specific",
+    detail: "Work on one product decision at a time so the idea becomes easy to explain.",
+  },
+  {
+    id: "check",
+    label: "Check idea",
+    stepLabel: "Step 3 of 4",
+    title: "Check your idea",
+    detail: "Use the short teacher check only after the student has a real product draft.",
+  },
+  {
+    id: "screens",
+    label: "Draw screens",
+    stepLabel: "Step 4 of 4",
+    title: "Draw four screens",
+    detail: "Keep the paper sketch task separate so students know exactly what to draw next.",
+  },
+];
 
 const canvasRulesByPrinciple = new Map<string, CanvasDesignRule>([
   [
@@ -685,6 +725,9 @@ async function generateIdeaChoices(project: StudioProject): Promise<IdeaChoiceRe
 }
 
 export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
+  const [activeFlowStep, setActiveFlowStep] = useState<CanvasFlowStepId>(() =>
+    isUsefulTopic(project.title) || isUsefulTopic(project.seedIdea) ? "builder" : "mission",
+  );
   const [activeDecisionIndex, setActiveDecisionIndex] = useState(0);
   const [ideaChoices, setIdeaChoices] = useState<IdeaChoiceSet | null>(null);
   const [choiceStatus, setChoiceStatus] = useState<ChoiceGenerationStatus>("idle");
@@ -698,6 +741,8 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
   const readyCount = readiness.filter((item) => item.ready).length;
   const activeReadinessLabel = readinessLabelByDecisionKey[activeDecision.key];
   const requiredPaperScreens = project.screens.filter((screen) => isRequiredPaperScreenId(screen.id));
+  const activeFlow = canvasFlowSteps.find((step) => step.id === activeFlowStep) ?? canvasFlowSteps[0];
+  const selectedMission = interestMissions.find((mission) => mission.project.title === project.title);
   const canConfirmIdea = isUsefulTopic(project.title) || isUsefulTopic(project.seedIdea);
   const choiceStatusLabel =
     choiceStatus === "loading"
@@ -743,6 +788,11 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
     setActiveDecisionIndex((current) => Math.min(Math.max(current + direction, 0), builderDecisions.length - 1));
   }
 
+  function goToFlowStep(stepId: CanvasFlowStepId) {
+    if ((stepId === "check" || stepId === "screens") && !canConfirmIdea) return;
+    setActiveFlowStep(stepId);
+  }
+
   function updateScreenSketchReference(id: StudioScreen["id"], value: string) {
     onChange({
       ...project,
@@ -774,10 +824,18 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
     setIdeaChoices(null);
     setChoiceStatus("idle");
     setActiveDecisionIndex(0);
+    setActiveFlowStep("builder");
     onChange({
       ...project,
       ...mission.project,
     });
+  }
+
+  function startCustomIdea() {
+    setIdeaChoices(null);
+    setChoiceStatus("idle");
+    setActiveDecisionIndex(0);
+    setActiveFlowStep("builder");
   }
 
   return (
@@ -810,225 +868,275 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
           </ul>
         </section>
       ) : null}
-      <div className="canvas-layout">
-        <section className="idea-builder" aria-labelledby="idea-builder-heading">
-          <div className="idea-builder-topline">
-            <div>
-              <p className="builder-kicker">Decision {activeDecisionIndex + 1} of {builderDecisions.length}</p>
-              <h2 id="idea-builder-heading">Idea Builder</h2>
-            </div>
-            <span className="builder-progress">{completedDecisions}/{builderDecisions.length} decisions shaped</span>
-          </div>
+      <section className="idea-builder" aria-labelledby="idea-builder-heading">
+        <nav className="student-flow-nav" aria-label="Product Canvas steps">
+          {canvasFlowSteps.map((step) => {
+            const isActive = step.id === activeFlowStep;
+            const isLocked = (step.id === "check" || step.id === "screens") && !canConfirmIdea;
 
-          <section className="interest-mission-board" aria-labelledby="interest-mission-heading">
-            <div className="interest-mission-copy">
-              <p className="builder-kicker">Student interest seeds</p>
-              <h3 id="interest-mission-heading">Start from something they already care about.</h3>
-              <p>Pick a seed, then edit the draft until it sounds like the student's own product.</p>
-            </div>
-            <div className="interest-mission-grid">
-              {interestMissions.map((mission) => (
-                <article className="interest-mission-card" key={mission.title}>
+            return (
+              <button
+                className={`student-flow-tab ${isActive ? "active" : ""}`}
+                key={step.id}
+                type="button"
+                aria-current={isActive ? "step" : undefined}
+                aria-label={step.label}
+                disabled={isLocked}
+                onClick={() => goToFlowStep(step.id)}
+              >
+                <span>{step.stepLabel.replace("Step ", "")}</span>
+                <strong>{step.label}</strong>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="student-flow-header">
+          <p className="builder-kicker">{activeFlow.stepLabel}</p>
+          <h2 id="idea-builder-heading">{activeFlow.title}</h2>
+          <p>{activeFlow.detail}</p>
+        </div>
+
+        <div className="student-flow-body">
+          {activeFlowStep === "mission" ? (
+            <section className="interest-mission-board" aria-labelledby="interest-mission-heading">
+              <div className="interest-mission-copy">
+                <p className="builder-kicker">Student interest seeds</p>
+                <h3 id="interest-mission-heading">Start from something they already care about.</h3>
+                <p>Pick one seed to get a useful draft, or start with a blank idea and shape it yourself.</p>
+              </div>
+              <div className="interest-mission-grid">
+                {interestMissions.map((mission) => (
+                  <article className="interest-mission-card" key={mission.title}>
+                    <div>
+                      <span className="mission-audience">{mission.audience}</span>
+                      <h4>{mission.title}</h4>
+                      <p>{mission.promise}</p>
+                    </div>
+                    <ul aria-label={`${mission.title} interest tags`}>
+                      {mission.tags.map((tag) => (
+                        <li key={tag}>{tag}</li>
+                      ))}
+                    </ul>
+                    <button
+                      className="secondary-button compact-action"
+                      type="button"
+                      onClick={() => applyInterestMission(mission)}
+                    >
+                      Use this seed
+                    </button>
+                  </article>
+                ))}
+                <article className="interest-mission-card custom-mission-card">
                   <div>
-                    <span className="mission-audience">{mission.audience}</span>
-                    <h4>{mission.title}</h4>
-                    <p>{mission.promise}</p>
+                    <span className="mission-audience">Own idea</span>
+                    <h4>Blank product canvas</h4>
+                    <p>Use this when a student already has a topic and needs a quiet place to make it specific.</p>
                   </div>
-                  <ul aria-label={`${mission.title} interest tags`}>
-                    {mission.tags.map((tag) => (
-                      <li key={tag}>{tag}</li>
-                    ))}
+                  <ul aria-label="Blank product canvas interest tags">
+                    <li>custom</li>
+                    <li>student choice</li>
+                    <li>paper first</li>
                   </ul>
-                  <button
-                    className="secondary-button compact-action"
-                    type="button"
-                    onClick={() => applyInterestMission(mission)}
-                  >
-                    Use this seed
+                  <button className="secondary-button compact-action" type="button" onClick={startCustomIdea}>
+                    Start custom idea
                   </button>
                 </article>
-              ))}
-            </div>
-          </section>
+              </div>
+            </section>
+          ) : null}
 
-          <div className="project-identity-strip" aria-label="Project identity">
-            <label>
-              <span>Project title</span>
-              <input
-                value={project.title}
-                placeholder="Lunch Lens"
-                onChange={(event) => updateField("title", event.target.value)}
-              />
-            </label>
-            <label>
-              <span>Seed idea</span>
-              <textarea
-                ref={seedIdeaRef}
-                className="seed-idea-textarea"
-                rows={2}
-                value={project.seedIdea}
-                placeholder="A small idea worth investigating"
-                onChange={(event) => {
-                  updateField("seedIdea", event.target.value);
-                  resizeSeedIdeaField(event.currentTarget);
-                }}
-              />
-            </label>
-            <div className="idea-confirm-box">
-              <button
-                className="primary-button idea-confirm-button"
-                type="button"
-                disabled={!canConfirmIdea || choiceStatus === "loading"}
-                onClick={() => {
-                  void handleConfirmIdea();
-                }}
-              >
-                {confirmButtonLabel}
-              </button>
-              <span className={`idea-choice-status ${choiceStatus}`} role="status" aria-live="polite">
-                {choiceStatusLabel}
-              </span>
-            </div>
-          </div>
+          {activeFlowStep === "builder" ? (
+            <section className="builder-step" aria-label="Make project specific">
+              <div className="selected-mission-strip" aria-label="Selected mission">
+                <div className="selected-mission-copy">
+                  <p className="builder-kicker">Selected mission</p>
+                  <strong>{project.title.trim() || "Custom project"}</strong>
+                  <span>{selectedMission?.promise ?? (project.seedIdea.trim() || "Start by naming the product and seed idea.")}</span>
+                </div>
+                <div className="selected-mission-actions">
+                  <span className="builder-progress">{readyCount}/{readiness.length} ready</span>
+                  <button className="secondary-button compact-action" type="button" onClick={() => setActiveFlowStep("mission")}>
+                    Change mission
+                  </button>
+                </div>
+              </div>
 
-          <div className="decision-rail" aria-label="Idea Builder decisions">
-            {builderDecisions.map((decision, index) => {
-              const isActive = index === activeDecisionIndex;
-              const isComplete = project[decision.key].trim().length > 0;
-
-              return (
-                <button
-                  className={`decision-dot ${isActive ? "active" : ""} ${isComplete ? "complete" : ""}`}
-                  key={decision.key}
-                  type="button"
-                  aria-pressed={isActive}
-                  onClick={() => setActiveDecisionIndex(index)}
-                >
-                  <span>{index + 1}</span>
-                  {decision.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <article className="decision-card">
-            <div className="decision-card-copy">
-              <p className="builder-kicker">{activeDecision.label}</p>
-              <h3>{activeDecision.title}</h3>
-              <p>{activeDecision.question}</p>
-              <span>{activeDecision.coach}</span>
-            </div>
-
-            <div className="prompt-chip-row" aria-label={`${activeDecision.label} idea starters`}>
-              {activePrompts.map((prompt) => (
-                <button
-                  className="prompt-chip"
-                  key={prompt.label}
-                  type="button"
-                  onClick={() => updateDecision(prompt.value)}
-                >
-                  {prompt.label}
-                </button>
-              ))}
-            </div>
-
-            <label className="builder-field" htmlFor={`builder-${activeDecision.key}`}>
-              <span>{activeDecision.label}</span>
-              {activeDecision.multiline ? (
-                <textarea
-                  id={`builder-${activeDecision.key}`}
-                  value={activeValue}
-                  placeholder={activeDecision.placeholder}
-                  onChange={(event) => updateDecision(event.target.value)}
-                />
-              ) : (
-                <input
-                  id={`builder-${activeDecision.key}`}
-                  value={activeValue}
-                  placeholder={activeDecision.placeholder}
-                  onChange={(event) => updateDecision(event.target.value)}
-                />
-              )}
-            </label>
-
-            <div className="builder-actions">
-              <button
-                className="secondary-button"
-                type="button"
-                disabled={activeDecisionIndex === 0}
-                onClick={() => moveDecision(-1)}
-              >
-                Previous decision
-              </button>
-              <button
-                className="primary-button"
-                type="button"
-                disabled={activeDecisionIndex === builderDecisions.length - 1}
-                onClick={() => moveDecision(1)}
-              >
-                Next decision
-              </button>
-            </div>
-          </article>
-
-          <aside className="live-brief" aria-label="Live product brief">
-            <p>Live brief</p>
-            <strong>{project.title.trim() || "Untitled project"}</strong>
-            <span>{buildBrief(project)}.</span>
-          </aside>
-
-          <section className="paper-plan-panel" aria-labelledby="paper-plan-heading">
-            <div className="paper-plan-copy">
-              <p className="builder-kicker">Paper-first screen list</p>
-              <h3 id="paper-plan-heading">Name the paper sketches</h3>
-              <p>Draw these four screens on paper, then type the page or photo reference here.</p>
-            </div>
-            <div className="paper-plan-grid">
-              {requiredPaperScreens.map((screen, index) => (
-                <label className="paper-screen-field" key={screen.id}>
-                  <span>{screen.name} sketch ref</span>
+              <div className="project-identity-strip" aria-label="Project identity">
+                <label>
+                  <span>Project title</span>
                   <input
-                    value={screen.paperSketchReference}
-                    placeholder={`Paper ${index + 1} or photo ${String.fromCharCode(65 + index)}`}
-                    onChange={(event) => updateScreenSketchReference(screen.id, event.target.value)}
+                    value={project.title}
+                    placeholder="Lunch Lens"
+                    onChange={(event) => updateField("title", event.target.value)}
                   />
                 </label>
-              ))}
-            </div>
-          </section>
-        </section>
-        <aside className="canvas-card compact-readiness-card" aria-label="Live project check">
-          <section className="canvas-support-section">
-            <div className="readiness-header">
-              <h2 id="specificity-check-heading">Specificity check</h2>
-              <span className="readiness-count" aria-live="polite">
-                {readyCount}/{readiness.length} ready
-              </span>
-            </div>
-            <div className="readiness-meter" aria-hidden="true">
-              <span className={`readiness-meter-fill progress-${readyCount}`} />
-            </div>
-            <div className="specificity-example" aria-label="Specificity example">
-              <span>Too vague</span>
-              <strong>Help the environment</strong>
-              <span>Buildable</span>
-              <strong>Grade 6 lunch bins after lunch</strong>
-            </div>
-            <div className="readiness-list compact-readiness-list">
-              {readiness.map((item) => (
-                <div
-                  className={`readiness-row ${item.ready ? "ready" : ""} ${item.label === activeReadinessLabel ? "active" : ""}`}
-                  key={item.label}
-                  aria-label={`${item.label}: ${item.ready ? "Ready" : "Needs work"}`}
-                >
-                  <span>{item.label}</span>
-                  <StatusPill ready={item.ready} label={item.ready ? "Ready" : "Needs work"} />
+                <label>
+                  <span>Seed idea</span>
+                  <textarea
+                    ref={seedIdeaRef}
+                    className="seed-idea-textarea"
+                    rows={2}
+                    value={project.seedIdea}
+                    placeholder="A small idea worth investigating"
+                    onChange={(event) => {
+                      updateField("seedIdea", event.target.value);
+                      resizeSeedIdeaField(event.currentTarget);
+                    }}
+                  />
+                </label>
+                <div className="idea-confirm-box">
+                  <button
+                    className="primary-button idea-confirm-button"
+                    type="button"
+                    disabled={!canConfirmIdea || choiceStatus === "loading"}
+                    onClick={() => {
+                      void handleConfirmIdea();
+                    }}
+                  >
+                    {confirmButtonLabel}
+                  </button>
+                  <span className={`idea-choice-status ${choiceStatus}`} role="status" aria-live="polite">
+                    {choiceStatusLabel}
+                  </span>
                 </div>
-              ))}
-            </div>
-          </section>
-        </aside>
-      </div>
+              </div>
+
+              <div className="idea-builder-topline builder-step-status">
+                <div>
+                  <p className="builder-kicker">Decision {activeDecisionIndex + 1} of {builderDecisions.length}</p>
+                  <strong>{activeDecision.label}</strong>
+                </div>
+                <span className="builder-progress">{completedDecisions}/{builderDecisions.length} decisions shaped</span>
+              </div>
+
+              <article className="decision-card">
+                <div className="decision-card-copy">
+                  <p className="builder-kicker">{activeDecision.label}</p>
+                  <h3>{activeDecision.title}</h3>
+                  <p>{activeDecision.question}</p>
+                  <span>{activeDecision.coach}</span>
+                </div>
+
+                <div className="prompt-chip-row" aria-label={`${activeDecision.label} idea starters`}>
+                  {activePrompts.map((prompt) => (
+                    <button
+                      className="prompt-chip"
+                      key={prompt.label}
+                      type="button"
+                      onClick={() => updateDecision(prompt.value)}
+                    >
+                      {prompt.label}
+                    </button>
+                  ))}
+                </div>
+
+                <label className="builder-field" htmlFor={`builder-${activeDecision.key}`}>
+                  <span>{activeDecision.label}</span>
+                  {activeDecision.multiline ? (
+                    <textarea
+                      id={`builder-${activeDecision.key}`}
+                      value={activeValue}
+                      placeholder={activeDecision.placeholder}
+                      onChange={(event) => updateDecision(event.target.value)}
+                    />
+                  ) : (
+                    <input
+                      id={`builder-${activeDecision.key}`}
+                      value={activeValue}
+                      placeholder={activeDecision.placeholder}
+                      onChange={(event) => updateDecision(event.target.value)}
+                    />
+                  )}
+                </label>
+
+                <div className="builder-actions">
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    disabled={activeDecisionIndex === 0}
+                    onClick={() => moveDecision(-1)}
+                  >
+                    Previous decision
+                  </button>
+                  <button
+                    className="primary-button"
+                    type="button"
+                    disabled={activeDecisionIndex === builderDecisions.length - 1}
+                    onClick={() => moveDecision(1)}
+                  >
+                    Next decision
+                  </button>
+                </div>
+              </article>
+            </section>
+          ) : null}
+
+          {activeFlowStep === "check" ? (
+            <section className="check-step-grid" aria-label="Project check">
+              <aside className="live-brief" aria-label="Live product brief">
+                <p>Live brief</p>
+                <strong>{project.title.trim() || "Untitled project"}</strong>
+                <span>{buildBrief(project)}.</span>
+              </aside>
+
+              <aside className="canvas-card compact-readiness-card" aria-label="Live project check">
+                <section className="canvas-support-section">
+                  <div className="readiness-header">
+                    <h2 id="specificity-check-heading">Specificity check</h2>
+                    <span className="readiness-count" aria-live="polite">
+                      {readyCount}/{readiness.length} ready
+                    </span>
+                  </div>
+                  <div className="readiness-meter" aria-hidden="true">
+                    <span className={`readiness-meter-fill progress-${readyCount}`} />
+                  </div>
+                  <div className="specificity-example" aria-label="Specificity example">
+                    <span>Too vague</span>
+                    <strong>Help the environment</strong>
+                    <span>Buildable</span>
+                    <strong>Grade 6 lunch bins after lunch</strong>
+                  </div>
+                  <div className="readiness-list compact-readiness-list">
+                    {readiness.map((item) => (
+                      <div
+                        className={`readiness-row ${item.ready ? "ready" : ""} ${item.label === activeReadinessLabel ? "active" : ""}`}
+                        key={item.label}
+                        aria-label={`${item.label}: ${item.ready ? "Ready" : "Needs work"}`}
+                      >
+                        <span>{item.label}</span>
+                        <StatusPill ready={item.ready} label={item.ready ? "Ready" : "Needs work"} />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </aside>
+            </section>
+          ) : null}
+
+          {activeFlowStep === "screens" ? (
+            <section className="paper-plan-panel" aria-labelledby="paper-plan-heading">
+              <div className="paper-plan-copy">
+                <p className="builder-kicker">Paper-first screen list</p>
+                <h3 id="paper-plan-heading">Name the paper sketches</h3>
+                <p>Draw these four screens on paper, then type the page or photo reference here.</p>
+              </div>
+              <div className="paper-plan-grid">
+                {requiredPaperScreens.map((screen, index) => (
+                  <label className="paper-screen-field" key={screen.id}>
+                    <span>{screen.name} sketch ref</span>
+                    <input
+                      value={screen.paperSketchReference}
+                      placeholder={`Paper ${index + 1} or photo ${String.fromCharCode(65 + index)}`}
+                      onChange={(event) => updateScreenSketchReference(screen.id, event.target.value)}
+                    />
+                  </label>
+                ))}
+              </div>
+            </section>
+          ) : null}
+        </div>
+      </section>
     </section>
   );
 }

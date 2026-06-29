@@ -84,25 +84,45 @@ describe("App", () => {
     expect(within(canvasRules).getByText("Check: title, seed idea, output.")).toBeInTheDocument();
     expect(within(canvasRules).getByText("Check: output and screen feedback.")).toBeInTheDocument();
 
-    const specificityCheck = screen.getByRole("complementary", { name: "Live project check" });
-    expect(within(specificityCheck).queryByText("Focus")).not.toBeInTheDocument();
+    expect(screen.queryByRole("complementary", { name: "Live project check" })).not.toBeInTheDocument();
   });
 
-  it("turns the Product Canvas form into a step-by-step idea builder", async () => {
+  it("starts Product Canvas with a focused mission picker", async () => {
     const user = userEvent.setup();
     render(<App />);
 
     await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
 
-    expect(screen.getByRole("heading", { name: "Idea Builder" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Pick your mission" })).toBeInTheDocument();
+    expect(screen.getByText("Step 1 of 4")).toBeInTheDocument();
+    expect(screen.getByText("Tennis Match Coach")).toBeInTheDocument();
+    expect(screen.getByText("Fair Fan Debate Coach")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Project title")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Specific user")).not.toBeInTheDocument();
+    expect(screen.queryByRole("complementary", { name: "Live project check" })).not.toBeInTheDocument();
+  });
+
+  it("turns the Product Canvas form into a step-by-step idea builder after a mission is selected", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
+    await user.click(screen.getAllByRole("button", { name: "Use this seed" })[2]);
+
+    expect(screen.getByRole("heading", { name: "Make it specific" })).toBeInTheDocument();
+    expect(screen.getByText("Step 2 of 4")).toBeInTheDocument();
+    expect(screen.getByText("Selected mission")).toBeInTheDocument();
+    expect(screen.getByLabelText("Project title")).toHaveValue("Soccer Card Scout");
+    expect(screen.getByLabelText("Seed idea")).toHaveValue(
+      "Help soccer card collectors decide which card fits their collection or trade goal.",
+    );
     expect(screen.getByText("Decision 1 of 8")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Lunch sorting table" })).toBeInTheDocument();
-    expect(screen.queryByLabelText("Specific user")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Lunch sorting table" }));
 
     expect(screen.getByLabelText("Problem")).toHaveValue("Lunch waste gets sorted wrong when the bins are crowded.");
-    expect(screen.getByText(/This project helps .*lunch waste gets sorted wrong/i)).toBeInTheDocument();
+    expect(screen.queryByRole("complementary", { name: "Live product brief" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Next decision" }));
 
@@ -141,6 +161,29 @@ describe("App", () => {
     expect(screen.getByText("6/7 ready")).toBeInTheDocument();
   });
 
+  it("keeps teacher checks and paper sketches in separate focused steps", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
+    await user.click(screen.getAllByRole("button", { name: "Use this seed" })[3]);
+
+    expect(screen.queryByRole("complementary", { name: "Live project check" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Name the paper sketches" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Check idea" }));
+
+    expect(screen.getByRole("heading", { name: "Check your idea" })).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Live project check" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Name the paper sketches" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Draw screens" }));
+
+    expect(screen.getByRole("heading", { name: "Draw four screens" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Name the paper sketches" })).toBeInTheDocument();
+    expect(screen.queryByRole("complementary", { name: "Live project check" })).not.toBeInTheDocument();
+  });
+
   it("generates idea starter buttons only after students confirm the title and seed idea", async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn().mockResolvedValue({
@@ -168,6 +211,7 @@ describe("App", () => {
     render(<App />);
 
     await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
+    await user.click(screen.getByRole("button", { name: "Start custom idea" }));
     await user.type(screen.getByLabelText("Project title"), "Pet Clothes Helper");
     await user.type(screen.getByLabelText("Seed idea"), "Help students pick safe pet clothes for weather and comfort");
 
@@ -196,6 +240,7 @@ describe("App", () => {
     render(<App />);
 
     await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
+    await user.click(screen.getByRole("button", { name: "Start custom idea" }));
     await user.type(screen.getByLabelText("Project title"), "Pet Clothes");
     await user.type(screen.getByLabelText("Seed idea"), "Help students choose pet outfits");
     await user.click(screen.getByRole("button", { name: "Confirm idea" }));
@@ -209,6 +254,7 @@ describe("App", () => {
     render(<App />);
 
     await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
+    await user.click(screen.getByRole("button", { name: "Start custom idea" }));
 
     const seedIdeaField = screen.getByLabelText("Seed idea");
     expect(seedIdeaField.tagName).toBe("TEXTAREA");
@@ -227,15 +273,13 @@ describe("App", () => {
     render(<App />);
 
     await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
+    await user.click(screen.getAllByRole("button", { name: "Use this seed" })[2]);
+    await user.click(screen.getByRole("button", { name: "Check idea" }));
 
     const liveCheck = screen.getByRole("complementary", { name: "Live project check" });
-    expect(within(liveCheck).getByText("0/7 ready")).toBeInTheDocument();
-    expect(within(liveCheck).getByLabelText("Real problem: Needs work")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Lunch sorting table" }));
-
-    expect(within(liveCheck).getByText("1/7 ready")).toBeInTheDocument();
+    expect(within(liveCheck).getByText("6/7 ready")).toBeInTheDocument();
     expect(within(liveCheck).getByLabelText("Real problem: Ready")).toBeInTheDocument();
+    expect(within(liveCheck).getByLabelText("Paper-first screen list: Needs work")).toBeInTheDocument();
   });
 
   it("lets students complete the paper-first screen list from the Product Canvas", async () => {
@@ -243,15 +287,18 @@ describe("App", () => {
     render(<App />);
 
     await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
+    await user.click(screen.getAllByRole("button", { name: "Use this seed" })[0]);
+    await user.click(screen.getByRole("button", { name: "Draw screens" }));
 
-    const liveCheck = screen.getByRole("complementary", { name: "Live project check" });
-    expect(within(liveCheck).getByLabelText("Paper-first screen list: Needs work")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Draw four screens" })).toBeInTheDocument();
 
     await user.type(screen.getByLabelText("Start sketch ref"), "Paper 1");
     await user.type(screen.getByLabelText("Input sketch ref"), "Paper 2");
     await user.type(screen.getByLabelText("AI Result sketch ref"), "Paper 3");
     await user.type(screen.getByLabelText("Human Review sketch ref"), "Paper 4");
 
+    await user.click(screen.getByRole("button", { name: "Check idea" }));
+    const liveCheck = screen.getByRole("complementary", { name: "Live project check" });
     expect(within(liveCheck).getByLabelText("Paper-first screen list: Ready")).toBeInTheDocument();
   });
 

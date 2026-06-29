@@ -573,7 +573,7 @@ h1 {
   text-transform: uppercase;
 }
 
-.canvas-rule-strip + .canvas-layout {
+.canvas-rule-strip + .idea-builder {
   margin-top: 18px;
 }
 
@@ -706,12 +706,149 @@ h1 {
 .idea-builder {
   display: grid;
   gap: 16px;
+  margin-top: 24px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 16px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 247, 243, 0.98)),
     var(--surface);
+}
+
+.student-flow-nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.student-flow-tab {
+  display: grid;
+  gap: 4px;
+  min-height: 74px;
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, var(--line));
+  border-radius: 8px;
+  padding: 10px;
+  background: white;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.student-flow-tab span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.student-flow-tab strong {
+  color: var(--ink);
+  font-size: 0.98rem;
+  line-height: 1.12;
+}
+
+.student-flow-tab:hover:not(:disabled),
+.student-flow-tab:focus-visible {
+  border-color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.student-flow-tab.active {
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+.student-flow-tab.active span {
+  color: color-mix(in srgb, var(--accent-soft) 78%, white);
+}
+
+.student-flow-tab.active strong {
+  color: white;
+}
+
+.student-flow-tab:disabled {
+  opacity: 0.46;
+  cursor: not-allowed;
+}
+
+.student-flow-header {
+  display: grid;
+  gap: 6px;
+  max-width: 760px;
+  border-left: 4px solid var(--accent);
+  padding-left: 14px;
+}
+
+.student-flow-header p:not(.builder-kicker) {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.student-flow-body,
+.builder-step {
+  display: grid;
+  gap: 14px;
+}
+
+.selected-mission-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid color-mix(in srgb, var(--ink) 16%, var(--line));
+  border-radius: 8px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--surface-soft) 64%, white);
+}
+
+.selected-mission-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.selected-mission-copy strong {
+  color: var(--ink);
+  font-size: 1.08rem;
+  line-height: 1.15;
+}
+
+.selected-mission-copy span {
+  color: var(--muted);
+  line-height: 1.42;
+}
+
+.selected-mission-actions {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.builder-step-status {
+  border: 1px dashed color-mix(in srgb, var(--ink) 18%, var(--line));
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.builder-step-status strong {
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
+.check-step-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.82fr);
+  gap: 12px;
+  align-items: start;
 }
 
 .idea-builder-topline {
@@ -845,6 +982,13 @@ h1 {
 .interest-mission-card .compact-action {
   width: 100%;
   min-width: 0;
+}
+
+.custom-mission-card {
+  border-style: dashed;
+  background:
+    linear-gradient(135deg, rgba(23, 63, 53, 0.07), rgba(255, 255, 255, 0.9)),
+    white;
 }
 
 .project-identity-strip {
@@ -1532,11 +1676,16 @@ h1 {
   .reference-grid,
   .form-grid,
   .canvas-layout,
+  .check-step-grid,
   .screen-grid,
   .screen-form-grid,
   .evidence-grid,
   .export-grid {
     grid-template-columns: 1fr;
+  }
+
+  .student-flow-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .screen-stepper {
@@ -1577,12 +1726,17 @@ h1 {
 
   .idea-builder-topline,
   .project-identity-strip,
+  .selected-mission-strip,
   .builder-actions {
     grid-template-columns: 1fr;
   }
 
   .idea-builder-topline {
     display: grid;
+  }
+
+  .selected-mission-actions {
+    justify-items: start;
   }
 
   .idea-confirm-box {
@@ -1615,6 +1769,10 @@ h1 {
 
   .decision-dot {
     min-height: 52px;
+  }
+
+  .student-flow-tab {
+    min-height: 68px;
   }
 
   h1 {
