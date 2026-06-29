@@ -20,6 +20,26 @@ interface BuilderPrompt {
   value: string;
 }
 
+interface InterestMission {
+  title: string;
+  audience: string;
+  tags: string[];
+  promise: string;
+  project: Pick<
+    StudioProject,
+    | "title"
+    | "seedIdea"
+    | "problem"
+    | "user"
+    | "userMoment"
+    | "input"
+    | "aiAction"
+    | "output"
+    | "impact"
+    | "responsibleAiNote"
+  >;
+}
+
 type ChoiceGenerationStatus = "idle" | "loading" | "model" | "backup";
 
 interface BuilderDecision {
@@ -263,6 +283,81 @@ const builderDecisions: BuilderDecision[] = [
         value: "The app should always show a reason, not just give an answer.",
       },
     ],
+  },
+];
+
+const interestMissions: InterestMission[] = [
+  {
+    title: "Tennis Match Coach",
+    audience: "Tennis fans",
+    tags: ["tennis", "practice", "fast feedback"],
+    promise: "Turn one rally problem into a tiny coach that gives the next drill.",
+    project: {
+      title: "Tennis Match Coach",
+      seedIdea: "Help young tennis players choose one useful practice move after a tough rally.",
+      problem: "Young tennis players often know they made a mistake in a rally, but they are not sure what to practice next.",
+      user: "Grade 6 tennis players who just finished a practice rally and want one clear next drill.",
+      userMoment: "Right after a rally or short match, before the player forgets what felt difficult.",
+      input: "A short note about what happened in the rally, such as missed serve, weak backhand, or late footwork.",
+      aiAction: "Classify the rally problem and recommend one practice drill with a short reason.",
+      output: "A coach card with the problem label, one drill, one reason, and a confidence note.",
+      impact: "Players choose a focused practice faster instead of repeating the same mistake without a plan.",
+      responsibleAiNote: "The app should not judge the player as good or bad; it should explain that a coach or adult still checks technique.",
+    },
+  },
+  {
+    title: "Lego Build Rescue",
+    audience: "Lego builders",
+    tags: ["lego", "instructions", "visual check"],
+    promise: "Help a builder recover when a step, piece, or direction gets confusing.",
+    project: {
+      title: "Lego Build Rescue",
+      seedIdea: "Help Lego builders spot what might be missing when a build suddenly stops making sense.",
+      problem: "Lego builders can get stuck when one piece is missing, flipped, or placed in the wrong direction.",
+      user: "Grade 6 Lego builders following a model or custom build during a focused building session.",
+      userMoment: "In the middle of a build, when the next step does not match what is on the table.",
+      input: "A photo of the current build plus the step number or one sentence about what looks wrong.",
+      aiAction: "Compare the build situation with the expected step and suggest the most likely next check.",
+      output: "A rescue card with a likely issue, a visual check, and one next action to try.",
+      impact: "Builders recover from stuck moments faster and keep building instead of giving up.",
+      responsibleAiNote: "The prototype should avoid storing photos of people and should say that the AI may miss small pieces.",
+    },
+  },
+  {
+    title: "Soccer Card Scout",
+    audience: "Soccer card collectors",
+    tags: ["soccer", "cards", "compare"],
+    promise: "Compare cards by role, stats, and collection goal instead of only hype.",
+    project: {
+      title: "Soccer Card Scout",
+      seedIdea: "Help soccer card collectors decide which card fits their collection or trade goal.",
+      problem: "Soccer card collectors can argue about cards without a clear way to compare role, stats, rarity, and personal goal.",
+      user: "Grade 6 soccer card collectors deciding whether to keep, trade, or feature one card.",
+      userMoment: "During a card swap or collection review, when two cards both look exciting.",
+      input: "Two card names, positions, simple stats, rarity, and the collector's goal.",
+      aiAction: "Compare the cards and recommend keep, trade, or feature with one reason.",
+      output: "A scout report with a winner for the user's goal, two evidence points, and a fair uncertainty note.",
+      impact: "Collectors make clearer choices and can explain the decision without only saying which player is famous.",
+      responsibleAiNote: "The app should not pretend to know real prices unless the data source is shown and checked by a person.",
+    },
+  },
+  {
+    title: "Fair Fan Debate Coach",
+    audience: "Strong sports opinions",
+    tags: ["soccer", "rivalry", "respectful argument"],
+    promise: "Turn an anti-player or anti-team hot take into a fair, evidence-backed argument.",
+    project: {
+      title: "Fair Fan Debate Coach",
+      seedIdea: "Help soccer fans explain a strong dislike for a player or rival team without making it mean.",
+      problem: "Sports fans often have strong anti-player or anti-team opinions, but the discussion can become unfair or personal.",
+      user: "Grade 6 soccer fans who want to explain a rival opinion in a debate or card discussion.",
+      userMoment: "after a friend asks why they dislike a famous player, team, or card and the conversation gets heated.",
+      input: "One hot take, one reason the fan believes it, and one fact or stat they want to use.",
+      aiAction: "Rewrite the hot take into a respectful argument, add evidence, and show one counterpoint.",
+      output: "A debate card with claim, evidence, respectful wording, and a counterpoint to check.",
+      impact: "Fans keep their personality and opinion while learning to argue with evidence and respect.",
+      responsibleAiNote: "The app should block insults, separate facts from opinions, and remind users not to target real people personally.",
+    },
   },
 ];
 
@@ -675,6 +770,16 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
     setChoiceStatus(result.source === "model" ? "model" : "backup");
   }
 
+  function applyInterestMission(mission: InterestMission) {
+    setIdeaChoices(null);
+    setChoiceStatus("idle");
+    setActiveDecisionIndex(0);
+    onChange({
+      ...project,
+      ...mission.project,
+    });
+  }
+
   return (
     <section className="module-panel">
       <p className="eyebrow">Product Canvas</p>
@@ -714,6 +819,37 @@ export function ProductCanvas({ project, onChange }: ProductCanvasProps) {
             </div>
             <span className="builder-progress">{completedDecisions}/{builderDecisions.length} decisions shaped</span>
           </div>
+
+          <section className="interest-mission-board" aria-labelledby="interest-mission-heading">
+            <div className="interest-mission-copy">
+              <p className="builder-kicker">Student interest seeds</p>
+              <h3 id="interest-mission-heading">Start from something they already care about.</h3>
+              <p>Pick a seed, then edit the draft until it sounds like the student's own product.</p>
+            </div>
+            <div className="interest-mission-grid">
+              {interestMissions.map((mission) => (
+                <article className="interest-mission-card" key={mission.title}>
+                  <div>
+                    <span className="mission-audience">{mission.audience}</span>
+                    <h4>{mission.title}</h4>
+                    <p>{mission.promise}</p>
+                  </div>
+                  <ul aria-label={`${mission.title} interest tags`}>
+                    {mission.tags.map((tag) => (
+                      <li key={tag}>{tag}</li>
+                    ))}
+                  </ul>
+                  <button
+                    className="secondary-button compact-action"
+                    type="button"
+                    onClick={() => applyInterestMission(mission)}
+                  >
+                    Use this seed
+                  </button>
+                </article>
+              ))}
+            </div>
+          </section>
 
           <div className="project-identity-strip" aria-label="Project identity">
             <label>

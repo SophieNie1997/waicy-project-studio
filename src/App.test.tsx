@@ -111,6 +111,36 @@ describe("App", () => {
     expect(screen.queryByLabelText("Problem")).not.toBeInTheDocument();
   });
 
+  it("offers interest-based project seeds for the new students", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
+
+    expect(screen.getByRole("heading", { name: "Start from something they already care about." })).toBeInTheDocument();
+    expect(screen.getByText("Tennis Match Coach")).toBeInTheDocument();
+    expect(screen.getByText("Lego Build Rescue")).toBeInTheDocument();
+    expect(screen.getByText("Soccer Card Scout")).toBeInTheDocument();
+    expect(screen.getByText("Fair Fan Debate Coach")).toBeInTheDocument();
+  });
+
+  it("turns an interest seed into an editable project draft", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Product Canvas Lesson 4" }));
+    await user.click(screen.getAllByRole("button", { name: "Use this seed" })[2]);
+
+    expect(screen.getByLabelText("Project title")).toHaveValue("Soccer Card Scout");
+    expect(screen.getByLabelText("Seed idea")).toHaveValue(
+      "Help soccer card collectors decide which card fits their collection or trade goal.",
+    );
+    expect(screen.getByLabelText("Problem")).toHaveValue(
+      "Soccer card collectors can argue about cards without a clear way to compare role, stats, rarity, and personal goal.",
+    );
+    expect(screen.getByText("6/7 ready")).toBeInTheDocument();
+  });
+
   it("generates idea starter buttons only after students confirm the title and seed idea", async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn().mockResolvedValue({
